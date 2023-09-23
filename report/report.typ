@@ -10,13 +10,13 @@
     #link("mailto:diogotc@kth.se")
   ], align(center)[
     Neil Prabhu\
-    #link("mailto:???@kth.se")
+    #link("mailto:nprabhu@kth.se")
   ], align(center)[
     Rafael Oliveira\
     #link("mailto:rmfseo@kth.se")
   ], align(center)[
     Yannik Tausch\
-    #link("mailto:???@kth.se")
+    #link("mailto:yannikt@kth.se")
   ])
 ]
 
@@ -60,7 +60,6 @@
 #pagebreak()
 = Group Members
 
-#pagebreak()
 == Diogo Correia
 
 // TODO 1 page
