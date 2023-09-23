@@ -6,8 +6,8 @@ services:
     restart: unless-stopped
     depends_on:
       - db
-    expose:
-      - 4567 # use a reverse proxy like Traefik
+    ports:
+      - 4567:4567
 
   db:
     image: mongo:bionic
