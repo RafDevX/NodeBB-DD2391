@@ -1,0 +1,12 @@
+{
+    "name": "nodebb-plugin-passkeys",
+    "version": "1.0.0",
+    "description": "A NodeBB plugin that provides passkeys support",
+    "main": "library.js",
+    "repository": "https://github.com/RafDevX/NodeBB-DD2391",
+    "author": "DD2391 Group 2",
+    "license": "MIT",
+    "nbbpm": {
+        "compatibility": "^3.4.2"
+    }
+}
