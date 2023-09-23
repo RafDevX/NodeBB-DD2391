@@ -1,0 +1,10 @@
+{
+    "id": "nodebb-plugin-passkeys",
+    "url": "https://github.com/RafDevX/NodeBB-DD2391",
+    "library": "./library.js",
+    "hooks": [],
+    "staticDirs": {
+        "static": "./static"
+    },
+    "templates": "static/templates"
+}
