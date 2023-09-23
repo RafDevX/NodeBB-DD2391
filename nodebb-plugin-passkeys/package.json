@@ -8,5 +8,16 @@
     "license": "MIT",
     "nbbpm": {
         "compatibility": "^3.4.2"
+    },
+    "dependencies": {
+        "@github/webauthn-json": "^0.5.7",
+        "arraybuffer-to-string": "^1.0.2",
+        "async": "^3.2.0",
+        "base64url": "^3.0.1",
+        "eslint": "8.x",
+        "fido2-lib": "^2.8.1",
+        "lru-cache": "^5.1.1",
+        "thirty-two": "1.0.2",
+        "u2f": "^0.1.3"
     }
 }

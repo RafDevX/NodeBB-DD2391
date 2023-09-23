@@ -34,14 +34,13 @@ plugin.init = async (params) => {
 		hostMiddleware.buildAccountData,
 	];
 	const hostHelpers = require.main.require('./src/routes/helpers');
-	// const controllers = require('./lib/controllers');
-	// const middlewares = require('./lib/middlewares');
+  const controllers = require('./lib/controllers');
 
 	// ACP
-	// hostHelpers.setupAdminPageRoute(router, '/admin/plugins/passkeys', [hostMiddleware.pluginHooks], controllers.renderAdminPage);
+  hostHelpers.setupAdminPageRoute(router, '/admin/plugins/passkeys', [hostMiddleware.pluginHooks], controllers.renderAdminPage);
 
 	// UCP
-	// hostHelpers.setupPageRoute(router, '/user/:userslug/passkeys', accountMiddlewares, controllers.renderSettings);
+  // hostHelpers.setupPageRoute(router, '/user/:userslug/passkeys', accountMiddlewares, controllers.renderSettings);
 
 	// 2fa Login
 	// hostHelpers.setupPageRoute(router, '/login/passkeys', [hostMiddleware.ensureLoggedIn], controllers.renderChoices);
@@ -203,19 +202,7 @@ plugin.saveAuthn = (uid, authnrData) => {
 	db.sortedSetAdd(`passkeys:webauthn:counters`, counter, id);
 };
 
-plugin.hasAuthn = async uid => db.exists(`passkeys:webauthn:${uid}`);
-
-plugin.hasTotp = async uid => db.isObjectField('passkeys:uid:key', uid);
-
-// hmm... remove?
-plugin.hasKey = async (uid) => {
-	const [hasTotp, hasAuthn] = await Promise.all([
-		db.isObjectField('passkeys:uid:key', uid),
-		plugin.hasAuthn(uid),
-	]);
-
-	return hasTotp || hasAuthn;
-};
+plugin.hasPasskey = async uid => db.exists(`passkeys:webauthn:${uid}`);
 
 plugin.disassociate = async (uid) => {
 	// Clear U2F keys
