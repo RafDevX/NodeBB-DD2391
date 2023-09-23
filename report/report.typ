@@ -148,6 +148,8 @@ measures, depending on the sensitivity of the information in the forum.
 #pagebreak()
 == Unauthorized Access
 
+https://github.com/danielmiessler/SecLists/blob/master/Passwords/Common-Credentials/10-million-password-list-top-100000.txt
+
 // TODO 2 pages
 
 #pagebreak()
