@@ -19,6 +19,13 @@ const SocketPlugins = require.main.require('./src/socket.io/plugins');
 
 const atob = base64str => Buffer.from(base64str, 'base64').toString('binary');
 
+const AUTHENTICATOR_SELECTION = {
+  // authenticatorAttachment: 'platform',
+  userVerification: 'prefered',
+  residentKey: 'required',
+  requireResidentKey: true,
+};
+
 const plugin = {
 	_f2l: undefined,
 };
@@ -40,7 +47,7 @@ plugin.init = async (params) => {
   hostHelpers.setupAdminPageRoute(router, '/admin/plugins/passkeys', [hostMiddleware.pluginHooks], controllers.renderAdminPage);
 
 	// UCP
-  // hostHelpers.setupPageRoute(router, '/user/:userslug/passkeys', accountMiddlewares, controllers.renderSettings);
+  hostHelpers.setupPageRoute(router, '/user/:userslug/passkeys', accountMiddlewares, controllers.renderSettings);
 
 	// 2fa Login
 	// hostHelpers.setupPageRoute(router, '/login/passkeys', [hostMiddleware.ensureLoggedIn], controllers.renderChoices);
@@ -49,10 +56,14 @@ plugin.init = async (params) => {
 	// SocketPlugins['passkeys'] = require('./websockets');
 
 	// Fido2Lib instantiation
+  // https://www.passkeys.com/guides
 	plugin._f2l = new Fido2Lib({
 		timeout: 60 * 1000, // 60 seconds
 		rpId: nconf.get('url_parsed').hostname,
 		rpName: meta.config.title || 'NodeBB',
+    authenticatorSelection: AUTHENTICATOR_SELECTION,
+    cryptoParams: [-7, -35, -36, -257, -258, -259, -37, -38, -39, -8],
+    attestation: 'none',
 	});
 
 	// Configure passkeys path exemptions
@@ -86,6 +97,7 @@ plugin.addRoutes = async ({ router, middleware, helpers }) => {
 		};
 		registrationRequest.challenge = base64url(registrationRequest.challenge);
 		req.session.registrationRequest = registrationRequest;
+    registrationRequest.authenticatorSelection = AUTHENTICATOR_SELECTION;
 		helpers.formatApiResponse(200, res, registrationRequest);
 	});
 

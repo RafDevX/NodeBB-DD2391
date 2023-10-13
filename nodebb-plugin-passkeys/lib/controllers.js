@@ -39,7 +39,7 @@ Controllers.renderChoices = async (req, res) => {
 		hasTotp,
 		hasBackupCodes,
 		next: req.query.next,
-		title: '[[2factor:title]]',
+		title: '[[passkeys:title]]',
 	});
 };
 
@@ -79,9 +79,6 @@ Controllers.renderAdminPage = async function (req, res, next) {
 	const groups = await getGroups('groups:createtime');
 
 	async.parallel({
-		image: async.apply(fs.readFile, path.join(__dirname, '../screenshots/profile.png'), {
-			encoding: 'base64',
-		}),
 		users: async.apply(parent.getUsers),
 	}, (err, data) => {
 		if (err) {
@@ -119,15 +116,12 @@ Controllers.renderSettings = async (req, res) => {
 		forceTfa = true;
 	}
 
-	const hasTotp = await parent.hasTotp(req.user.uid);
-	const hasAuthn = await parent.hasAuthn(req.user.uid);
+	const hasPasskey = await parent.hasPasskey(req.user.uid);
 	res.render('account/passkeys', {
 		title,
 		breadcrumbs,
 		forceTfa,
-		hasTotp,
-		hasAuthn,
-		backupCodeCount: await parent.countBackupCodes(req.user.uid),
+		hasPasskey,
 	});
 };
 
