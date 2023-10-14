@@ -85,3 +85,38 @@ nodebb-repo:
   url:
     value: https://github.com/NodeBB/NodeBB
     date: 2023-10-18
+nodebb-plugin-2factor:
+  type: repository
+  title:
+    value: Two-Factor Authentication for NodeBB
+    verbatim: true
+  url:
+    value: https://github.com/NodeBB/nodebb-plugin-2factor/
+    date: 2023-10-14
+fido-passkeys:
+  type: web
+  title: "Passkeys: Accelerating the Availability of Simpler, Stronger Passwordless Sign-Ins"
+  url:
+    value: https://fidoalliance.org/passkeys/
+    date: 2023-10-14
+passkeys-devices:
+  type: web
+  title: Can I use passkeys on my devices?
+  url:
+    value: https://www.passkeys.io/compatible-devices
+    date: 2023-10-14
+  parent:
+    type: web
+    title: passkeys.io
+    url: https://www.passkeys.io
+nodebb-passkeys:
+  type: thread
+  title: "What's next after v3?"
+  date: 2023-05-07
+  url:
+    value: https://community.nodebb.org/topic/17117/what-s-next-after-v3/11
+    date: 2023-10-14
+  parent:
+    type: Web
+    title: NodeBB Community
+    url: https://community.nodebb.org/
