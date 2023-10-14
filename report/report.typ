@@ -1,4 +1,6 @@
 #set page("a4")
+#set text(12pt)
+#show heading: set block(above: 1.4em, below: 1em)
 #align(center + horizon)[
   #heading(outlined: false)[Cybersecurity Project DD2391/DD2394]
   #heading(outlined: false, level: 2)[Group 2]
