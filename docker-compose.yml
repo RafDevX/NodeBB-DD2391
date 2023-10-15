@@ -2,16 +2,16 @@ version: '3.5'
 
 services:
   nodebb:
-    image: ghcr.io/nodebb/nodebb:3.4.2
+    build: .
     restart: unless-stopped
     depends_on:
       - db
     ports:
       - 127.0.0.1:4567:4567
+    environment:
+      config: /etc/nodebb/config.json
     volumes:
-      - type: bind
-        source: ./config.json
-        target: /usr/src/app/config.json
+      - nodebb-config:/etc/nodebb
 
   db:
     image: mongo:6.0
@@ -28,4 +28,5 @@ services:
         target: /docker-entrypoint-initdb.d/init_user.js
 
 volumes:
+  nodebb-config:
   mongo:
