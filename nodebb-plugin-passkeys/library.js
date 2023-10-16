@@ -1,27 +1,28 @@
 'use strict';
 
 const { Fido2Lib } = require('fido2-lib');
-const base64url = require('base64url');
 
 const db = require.main.require('./src/database');
 const nconf = require.main.require('nconf');
-const async = require.main.require('async');
+const passport = require.main.require('passport');
 const user = require.main.require('./src/user');
 const meta = require.main.require('./src/meta');
 const groups = require.main.require('./src/groups');
 const plugins = require.main.require('./src/plugins');
-const notifications = require.main.require('./src/notifications');
-const utils = require.main.require('./src/utils');
 const translator = require.main.require('./src/translator');
 const routeHelpers = require.main.require('./src/routes/helpers');
 const controllerHelpers = require.main.require('./src/controllers/helpers');
-const SocketPlugins = require.main.require('./src/socket.io/plugins');
 
-const atob = (base64str) => Buffer.from(base64str, 'base64').toString('binary');
+const PasskeyStrategy = require('./lib/strategy');
+
+const b64uEncode = (s) => Buffer.from(s, 'binary').toString('base64url');
+const b64uDecode = (b) => Buffer.from(b, 'base64url').toString('binary');
+
+const origin =
+    nconf.get('url_parsed').protocol + '//' + nconf.get('url_parsed').host;
 
 const AUTHENTICATOR_SELECTION = {
-    // authenticatorAttachment: 'platform',
-    userVerification: 'prefered',
+    userVerification: 'required',
     residentKey: 'required',
     requireResidentKey: true,
 };
@@ -30,40 +31,42 @@ const plugin = {
     _f2l: undefined,
 };
 
-plugin.init = async (params) => {
-    const { router } = params;
-    const hostMiddleware = params.middleware;
-    const accountMiddlewares = [
-        hostMiddleware.exposeUid,
-        hostMiddleware.ensureLoggedIn,
-        hostMiddleware.canViewUsers,
-        hostMiddleware.checkAccountPermissions,
-        hostMiddleware.buildAccountData,
-    ];
-    const hostHelpers = require.main.require('./src/routes/helpers');
+// ----- //
+// Hooks //
+// ----- //
+
+plugin.init = async ({ router, middleware }) => {
     const controllers = require('./lib/controllers');
+    const accountMiddlewares = [
+        middleware.exposeUid,
+        middleware.ensureLoggedIn,
+        middleware.canViewUsers,
+        middleware.checkAccountPermissions,
+        middleware.buildAccountData,
+    ];
 
     // ACP
-    hostHelpers.setupAdminPageRoute(
+    routeHelpers.setupAdminPageRoute(
         router,
         '/admin/plugins/passkeys',
-        [hostMiddleware.pluginHooks],
+        [middleware.pluginHooks],
         controllers.renderAdminPage
     );
 
     // UCP
-    hostHelpers.setupPageRoute(
+    routeHelpers.setupPageRoute(
         router,
         '/user/:userslug/passkeys',
         accountMiddlewares,
-        controllers.renderSettings
+        controllers.renderSettingsPage
     );
 
-    // 2fa Login
-    // hostHelpers.setupPageRoute(router, '/login/passkeys', [hostMiddleware.ensureLoggedIn], controllers.renderChoices);
-
-    // Websockets
-    // SocketPlugins['passkeys'] = require('./websockets');
+    routeHelpers.setupPageRoute(
+        router,
+        '/login/passkey',
+        [middleware.pluginHooks],
+        controllers.renderLoginPage
+    );
 
     // Fido2Lib instantiation
     // https://www.passkeys.com/guides
@@ -72,23 +75,23 @@ plugin.init = async (params) => {
         rpId: nconf.get('url_parsed').hostname,
         rpName: meta.config.title || 'NodeBB',
         authenticatorSelection: AUTHENTICATOR_SELECTION,
-        cryptoParams: [-7, -35, -36, -257, -258, -259, -37, -38, -39, -8],
+        // https://www.iana.org/assignments/cose/cose.xhtml
+        cryptoParams: [-36, -35, -7, -39, -38, -37, -259, -258, -257],
         attestation: 'none',
     });
 
     // Configure passkeys path exemptions
     let prefixes = ['/reset', '/confirm'];
-    let pages = ['/login/passkeys', '/register/complete'];
-    let paths = ['/api/v3/plugins/passkeys/verify'];
+    let pages = ['/login/passkey', '/register/complete'];
+    let paths = ['/api/v3/plugins/passkeys/register', '/auth/passkey'];
     ({ prefixes, pages, paths } = await plugins.hooks.fire(
         'filter:passkeys.exemptions',
         { prefixes, pages, paths }
     ));
-    pages = pages.reduce((memo, cur) => {
-        memo.push(nconf.get('relative_path') + cur);
-        memo.push(`${nconf.get('relative_path')}/api${cur}`);
-        return memo;
-    }, []);
+    pages = pages.flatMap((page) => [
+        nconf.get('relative_path') + page,
+        nconf.get('relative_path') + '/api' + page,
+    ]);
     plugin.exemptions = {
         prefixes,
         paths: new Set(pages.concat(paths)),
@@ -110,16 +113,17 @@ plugin.addRoutes = async ({ router, middleware, helpers }) => {
                 'displayname',
             ]);
             registrationRequest.user = {
-                id: base64url(String(req.uid)),
+                id: b64uEncode(Number.toString(req.uid)),
                 name: userData.username,
                 displayName: userData.displayname,
             };
-            registrationRequest.challenge = base64url(
+            registrationRequest.challenge = b64uEncode(
                 registrationRequest.challenge
             );
-            req.session.registrationRequest = registrationRequest;
             registrationRequest.authenticatorSelection =
                 AUTHENTICATOR_SELECTION;
+            req.session.passkeysRegistrationRequest = registrationRequest;
+
             helpers.formatApiResponse(200, res, registrationRequest);
         }
     );
@@ -130,75 +134,30 @@ plugin.addRoutes = async ({ router, middleware, helpers }) => {
         '/passkeys/register',
         middlewares,
         async (req, res) => {
-            const attestationExpectations = {
-                challenge: req.session.registrationRequest.challenge,
-                origin: `${nconf.get('url_parsed').protocol}//${
-                    nconf.get('url_parsed').host
-                }`,
-                factor: 'second',
-            };
-            req.body.rawId = Uint8Array.from(
-                atob(base64url.toBase64(req.body.rawId)),
-                (c) => c.charCodeAt(0)
-            ).buffer;
-            const regResult = await plugin._f2l.attestationResult(
-                req.body,
-                attestationExpectations
-            );
-            plugin.saveAuthn(req.uid, regResult.authnrData);
-            delete req.session.registrationRequest;
-            req.session.tfa = true; // eliminate re-challenge on registration
+            try {
+                const attestationExpectations = {
+                    challenge:
+                        req.session.passkeysRegistrationRequest.challenge,
+                    origin,
+                    factor: 'first',
+                };
 
-            helpers.formatApiResponse(200, res);
-        }
-    );
+                req.body.rawId = Uint8Array.from(
+                    b64uDecode(req.body.rawId),
+                    (c) => c.charCodeAt(0)
+                ).buffer;
+                const regResult = await plugin._f2l.attestationResult(
+                    req.body,
+                    attestationExpectations
+                );
+                plugin.saveAuthn(req.uid, regResult.authnrData);
+                delete req.session.passkeysRegistrationRequest;
 
-    // Note: auth request generated in Controllers.renderLogin
-    routeHelpers.setupApiRoute(
-        router,
-        'post',
-        '/passkeys/verify',
-        middlewares,
-        async (req, res) => {
-            const prevCounter = await plugin.getAuthnCount(
-                req.body.authResponse.id
-            );
-            const publicKey = await plugin.getAuthnPublicKey(
-                req.uid,
-                req.body.authResponse.id
-            );
-            const expectations = {
-                challenge: req.session.authRequest,
-                origin: `${nconf.get('url_parsed').protocol}//${
-                    nconf.get('url_parsed').host
-                }`,
-                factor: 'second',
-                publicKey,
-                prevCounter,
-                userHandle: null,
-            };
-
-            req.body.authResponse.rawId = Uint8Array.from(
-                atob(base64url.toBase64(req.body.authResponse.rawId)),
-                (c) => c.charCodeAt(0)
-            ).buffer;
-            req.body.authResponse.response.userHandle = undefined;
-
-            const authnResult = await plugin._f2l.assertionResult(
-                req.body.authResponse,
-                expectations
-            );
-            const count = authnResult.authnrData.get('counter');
-            await plugin.updateAuthnCount(req.body.authResponse.id, count);
-
-            req.session.tfa = true;
-            delete req.session.authRequest;
-            delete req.session.tfaForce;
-            req.session.meta.datetime = Date.now();
-
-            helpers.formatApiResponse(200, res, {
-                next: req.query.next || '/',
-            });
+                helpers.formatApiResponse(200, res);
+            } catch (e) {
+                console.error(e);
+                helpers.formatApiResponse(500, res);
+            }
         }
     );
 
@@ -208,12 +167,46 @@ plugin.addRoutes = async ({ router, middleware, helpers }) => {
         '/passkeys',
         middlewares,
         async (req, res) => {
-            const { uid } = req;
-            const keyIds = await db.getObjectKeys(`passkeys:webauthn:${uid}`);
-            await db.sortedSetRemove('passkeys:webauthn:counters', keyIds);
-            await db.delete(`passkeys:webauthn:${uid}`);
+            await plugin.clearAllKeys(req.uid);
+            helpers.formatApiResponse(200, res);
+        }
+    );
+
+    routeHelpers.setupApiRoute(
+        router,
+        'post',
+        '/passkeys/pwdless-enforced-groups',
+        [...middlewares, middleware.admin.checkPrivileges],
+        async (req, res) => {
+            if (
+                !Array.isArray(req.body) ||
+                req.body.some((g) => typeof g !== 'string')
+            ) {
+                helpers.formatApiResponse(400, res);
+                return;
+            }
+
+            await meta.settings.setOne(
+                'passkeys',
+                'pwdlessEnforcedGroups',
+                JSON.stringify(req.body)
+            );
 
             helpers.formatApiResponse(200, res);
+        }
+    );
+
+    routeHelpers.setupApiRoute(
+        router,
+        'post',
+        '/passkeys/login',
+        [],
+        async (req, res) => {
+            const loginRequest = await plugin._f2l.assertionOptions();
+            loginRequest.challenge = b64uEncode(loginRequest.challenge);
+            req.session.passkeysLoginRequest = loginRequest;
+
+            helpers.formatApiResponse(200, res, loginRequest);
         }
     );
 };
@@ -250,56 +243,100 @@ plugin.addProfileItem = function (data, callback) {
     });
 };
 
-plugin.get = async (uid) => db.getObjectField('passkeys:uid:key', uid);
+plugin.getLoginStrategy = function (strategies, callback) {
+    passport.use(
+        'passkey',
+        new PasskeyStrategy(
+            {
+                loginPagePath: '/login/passkey',
+                successPagePath: '/',
+                failurePagePath: '/login',
+            },
+            async (req, assertion) => {
+                const encodedUserHandle = assertion.response?.userHandle;
+                if (typeof encodedUserHandle !== 'string') {
+                    return null;
+                }
+                const uid = parseInt(b64uDecode(encodedUserHandle), 10);
+                if (Number.isNaN(uid)) {
+                    return null;
+                }
 
-plugin.getAuthnKeyIds = async (uid) => {
-    const keys = await db.getObject(`passkeys:webauthn:${uid}`);
-    return Object.keys(keys);
+                const publicKey = await plugin.getAuthnPublicKey(
+                    uid,
+                    assertion.id
+                );
+                if (publicKey === null) {
+                    return null;
+                }
+
+                const prevCounter = await plugin.getAuthnCount(assertion.id);
+                if (prevCounter === null) {
+                    return null;
+                }
+
+                const assertionExpectations = {
+                    challenge: req.session.passkeysLoginRequest.challenge,
+                    origin,
+                    factor: 'first',
+                    publicKey,
+                    prevCounter,
+                    userHandle: encodedUserHandle,
+                };
+
+                assertion.rawId = Uint8Array.from(
+                    b64uDecode(assertion.rawId),
+                    (c) => c.charCodeAt(0)
+                ).buffer;
+                const result = await plugin._f2l.assertionResult(
+                    assertion,
+                    assertionExpectations
+                );
+                const count = result.authnrData.get('counter');
+                await plugin.updateAuthnCount(assertion.id, count);
+
+                delete req.session.passkeysLoginRequest;
+
+                return { uid };
+            }
+        )
+    );
+
+    strategies.push({
+        name: 'passkey',
+        url: '/auth/passkey',
+        urlMethod: 'get',
+        callbackURL: '/auth/passkey',
+        callbackMethod: 'post',
+        checkState: false,
+        successUrl: '/auth/passkey', // cannot be / directly as we need to absorb the POST into GET
+        failureUrl: '/auth/passkey', // cannot be /login directly as we need to absorb the POST into GET
+        icon: 'fa-key',
+        labels: {
+            login: '[[passkeys:login-with-passkey]]',
+            register: '[[passkeys:login-with-passkey]]', // will show up on register page, nothing we can do
+        },
+    });
+
+    callback(null, strategies);
 };
 
-plugin.getAuthnPublicKey = async (uid, id) =>
-    db.getObjectField(`passkeys:webauthn:${uid}`, id);
+plugin.checkPwdlessLogin = async (data) => {
+    const uid = await user.getUidByUsername(data.userData.username);
 
-plugin.getAuthnCount = async (id) =>
-    db.sortedSetScore(`passkeys:webauthn:counters`, id);
-
-plugin.updateAuthnCount = async (id, count) =>
-    db.sortedSetAdd(`passkeys:webauthn:counters`, count, id);
-
-plugin.save = function (uid, key, callback) {
-    db.setObjectField('passkeys:uid:key', uid, key, callback);
-};
-
-plugin.saveAuthn = (uid, authnrData) => {
-    const counter = authnrData.get('counter');
-    const publicKey = authnrData.get('credentialPublicKeyPem');
-    const id = base64url(authnrData.get('credId'));
-    db.setObjectField(`passkeys:webauthn:${uid}`, id, publicKey);
-    db.sortedSetAdd(`passkeys:webauthn:counters`, counter, id);
-};
-
-plugin.hasPasskey = async (uid) => db.exists(`passkeys:webauthn:${uid}`);
-
-plugin.disassociate = async (uid) => {
-    // Clear U2F keys
-    const keyIds = await db.getObjectKeys(`passkeys:webauthn:${uid}`);
-    await db.sortedSetRemove('passkeys:webauthn:counters', keyIds);
-    await db.delete(`passkeys:webauthn:${uid}`);
-};
-
-plugin.overrideUid = async ({ req, locals }) => {
-    if (req.uid && (await plugin.hasKey(req.uid)) && req.session.tfa !== true) {
-        locals['passkeys'] = req.uid;
-        req.uid = 0;
-        delete req.user;
-        delete req.loggedIn;
+    if (
+        uid > 0 &&
+        (await plugin.hasPasskey(uid)) &&
+        (await plugin.forcePwdless(uid))
+    ) {
+        throw new Error('[[passkeys:pwdless.login-disallowed]]');
+    } else {
+        return data;
     }
-
-    return { req, locals };
 };
 
-plugin.check = async ({ req, res }) => {
-    if (!req.user || req.session.tfa === true) {
+plugin.checkForcePasskey = async ({ req, res }) => {
+    if (!req.user) {
         return;
     }
 
@@ -313,129 +350,74 @@ plugin.check = async ({ req, res }) => {
         return;
     }
 
-    let { tfaEnforcedGroups } = await meta.settings.get('passkeys');
-    tfaEnforcedGroups = JSON.parse(tfaEnforcedGroups || '[]');
+    if (await plugin.hasPasskey(req.user.uid)) {
+        return;
+    }
 
-    const redirect = requestPath
-        .replace('/api', '')
-        .replace(nconf.get('relative_path'), '');
+    if (!(await plugin.forcePwdless(req.user.uid))) {
+        return;
+    }
 
-    if (await plugin.hasKey(req.user.uid)) {
-        if (!res.locals.isAPI) {
-            // Account has TFA, redirect to login
-            controllerHelpers.redirect(res, `/login/passkeys?next=${redirect}`);
-        } else {
-            await controllerHelpers.formatApiResponse(
+    const redirect = requestPath.replace(nconf.get('relative_path'), '');
+
+    if (req.url.startsWith('/admin') || !req.url.match('passkeys')) {
+        if (res.locals.isAPI) {
+            controllerHelpers.formatApiResponse(
                 401,
                 res,
                 new Error('[[passkeys:passkey-required]]')
             );
-        }
-    } else if (
-        tfaEnforcedGroups.length &&
-        (await groups.isMemberOfGroups(req.uid, tfaEnforcedGroups)).includes(
-            true
-        )
-    ) {
-        if (
-            req.url.startsWith('/admin') ||
-            (!req.url.startsWith('/admin') && !req.url.match('passkeys'))
-        ) {
+            return;
+        } else {
             controllerHelpers.redirect(res, `/me/passkeys?next=${redirect}`);
         }
     }
-
-    // No TFA setup
 };
 
-plugin.checkSocket = async (data) => {
-    if (!data.socket.uid || data.req.session.tfa === true) {
-        return;
-    }
+// --------- //
+// Utilities //
+// --------- //
 
-    if (await plugin.hasKey(data.socket.uid)) {
-        throw new Error('[[passkeys:passkey-required]]');
-    }
+plugin.getAuthnPublicKey = async (uid, id) =>
+    db.getObjectField(`passkeys:pubkeys:${uid}`, id);
+
+plugin.getAuthnCount = async (id) => db.sortedSetScore(`passkeys:counters`, id);
+
+plugin.updateAuthnCount = async (id, count) =>
+    db.sortedSetAdd(`passkeys:counters`, count, id);
+
+plugin.saveAuthn = (uid, authnrData) => {
+    const counter = authnrData.get('counter');
+    const publicKey = authnrData.get('credentialPublicKeyPem');
+    const id = b64uEncode(authnrData.get('credId'));
+    db.setObjectField(`passkeys:pubkeys:${uid}`, id, publicKey);
+    db.sortedSetAdd(`passkeys:counters`, counter, id);
 };
 
-plugin.clearSession = function (data, callback) {
-    if (data.req.session) {
-        delete data.req.session.tfa;
-    }
+plugin.hasPasskey = async (uid) => db.exists(`passkeys:pubkeys:${uid}`);
 
-    setImmediate(callback);
+plugin.clearAllKeys = async (uid) => {
+    const keyIds = await db.getObjectKeys(`passkeys:pubkeys:${uid}`);
+    await db.sortedSetRemove('passkeys:counters', keyIds);
+    await db.delete(`passkeys:pubkeys:${uid}`);
 };
 
-plugin.getUsers = function (callback) {
-    async.waterfall(
-        [
-            async.apply(db.getObjectKeys, 'passkey:uid:key'),
-            function (uids, next) {
-                user.getUsersFields(
-                    uids,
-                    ['username', 'userslug', 'picture'],
-                    next
-                );
-            },
-        ],
-        callback
+plugin.getPwdlessEnforcedGroups = async () => {
+    return JSON.parse(
+        (await meta.settings.getOne('passkeys', 'pwdlessEnforcedGroups')) ??
+            '[]'
     );
 };
 
-plugin.adjustRelogin = async ({ req, res }) => {
-    if (await plugin.hasKey(req.uid)) {
-        req.session.forceLogin = 0;
-        req.session.tfaForce = 1;
-        controllerHelpers.redirect(
-            res,
-            `/login/passkeys?next=${req.session.returnTo}`
+plugin.forcePwdless = async (uid) =>
+    await groups.isMemberOfAny(uid, await plugin.getPwdlessEnforcedGroups());
+
+plugin.getUsers = async function () {
+    return db
+        .getObjectKeys('passkeys:pubkeys') // FIXME: does not work
+        .then((uids) =>
+            user.getUsersFields(uids, ['username', 'userslug', 'picture'])
         );
-    }
-};
-
-plugin.integrations = {};
-
-plugin.integrations.writeApi = async (data) => {
-    const routeTest = /^\/api\/v\d\/users\/\d+\/tokens\/?/;
-    const uidMatch = data.route.match(/(\d+)\/tokens$/);
-    const uid = uidMatch ? parseInt(uidMatch[1], 10) : 0;
-
-    // Enforce 2FA on token generation route
-    if (
-        data.method === 'POST' &&
-        routeTest.test(data.route) &&
-        (await plugin.hasTotp(uid))
-    ) {
-        if (!data.req.headers.hasOwnProperty('x-two-factor-authentication')) {
-            // No 2FA received
-            return data.res
-                .status(400)
-                .json(
-                    data.errorHandler.generate(
-                        400,
-                        '2fa-enabled',
-                        'Two Factor Authentication is enabled for this route, please send in the appropriate additional header for authorization',
-                        ['x-two-factor-authentication']
-                    )
-                );
-        }
-
-        const skew = notp.totp.verify(
-            data.req.headers['x-two-factor-authentication'],
-            await plugin.get(uid)
-        );
-        if (!skew || Math.abs(skew.delta) > 2) {
-            return data.res
-                .status(400)
-                .json(
-                    data.errorHandler.generate(
-                        401,
-                        '2fa-failed',
-                        'The Two-Factor Authentication code provided is not correct or has expired'
-                    )
-                );
-        }
-    }
 };
 
 module.exports = plugin;

@@ -1,4 +1,23 @@
 {
+    "admin.pwdless-enforced-groups.saved": "Successfully saved passwordless groups",
+    "admin.pwdless-enforced-groups.help": "Any users in the groups selected below will only be able to login using a passkey. Members without a passkey registered will be forced to register one before being allowed to navigate the website",
+    "admin.pwdless-enforced-groups.title": "Per-Group Passwordless Enforcement",
+    "admin.users.none": "No users have registered passkeys",
+    "admin.users.text": "The users below have registered passkeys. You may click them to remove their registered passkey, so they can no longer use it to login. Use this if you believe it to be compromised",
+    "admin.users.title": "Users with Registered Passkeys",
+    "login-with-passkey": "Login with a Passkey",
+    "logging-in": "Logging in, please wait...",
+    "passkey-required": "A passkey is required to access this route",
+    "pwdless.login-disallowed": "You may only login using a passkey",
     "title": "Passkeys",
-    "passkey-required": "A passkey is required to access this route"
+    "user.intro.one": "Passkey Management",
+    "user.intro.three": "Register a passkey below in order to start using it to login",
+    "user.intro.two": "A passkey is a new way to login that works completely without passwords. Passkeys leverage on-device security capabilities and are more secure than passwords",
+    "user.manage.disable": "Remove Passkey",
+    "user.manage.disable.confirm": "Are you sure you want to remove this passkey? You will no longer be able to use it to login",
+    "user.manage.enable": "Register Passkey",
+    "user.manage.lead": "Manage Passkeys",
+    "user.register.error": "An error has occurred and your passkey could not be registered",
+    "user.register.modal.content": "Please follow your device's instructions to register a new passkey",
+    "user.register.success": "Passkey successfully registered"
 }

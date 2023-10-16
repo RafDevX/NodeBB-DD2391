@@ -6,13 +6,18 @@
         { "hook": "static:app.load", "method": "init" },
         { "hook": "static:api.routes", "method": "addRoutes" },
         { "hook": "filter:admin.header.build", "method": "addAdminNavigation" },
-        { "hook": "filter:user.profileMenu", "method": "addProfileItem" }
+        { "hook": "filter:user.profileMenu", "method": "addProfileItem" },
+        { "hook": "filter:auth.init", "method": "getLoginStrategy" },
+        { "hook": "filter:login.check", "method": "checkPwdlessLogin" },
+        { "hook": "response:router.page", "method": "checkForcePasskey" }
     ],
     "staticDirs": {
         "static": "./static"
     },
     "modules": {
-        "../client/account/passkeys.js": "./static/lib/settings.js"
+        "../client/account/passkeys.js": "./static/lib/settings.js",
+        "../client/login/passkey.js": "./static/lib/login.js",
+        "../admin/plugins/passkeys.js": "./static/lib/admin.js"
     },
     "templates": "static/templates",
     "languages": "languages",
