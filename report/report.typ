@@ -1,3 +1,5 @@
+#import "@preview/tablex:0.0.5": tablex, colspanx, rowspanx
+
 #set page("a4")
 #set text(12pt)
 #show heading: set block(above: 1.4em, below: 1em)
@@ -152,7 +154,7 @@ An attacker could target a *specific user* and try to bruteforce their password 
 
 Additionally, the attacker could facilitate a botnet to *distribute* their attack over many IP addresses instead of originating all requests from a single IP.
 
-The goal of the attacker could either be to compromise *confidentiality and integrity* by guessing the user's password and taking over their account, or to compromise *availability* by triggering an account locking mechanism designed to prevent password guessing. These two aspects have to be thought together when designing countermeasures because the effectiveness of these countermeasures depend on each other. 
+The goal of the attacker could either be to compromise *confidentiality and integrity* by guessing the user's password and taking over their account, or to compromise *availability* by triggering an account locking mechanism designed to prevent password guessing. Although compromosing avilability is strictly speaking not part of somebody gaining "unauthorized access", these two aspects have to be thought together when designing countermeasures because the effectiveness of these countermeasures depend on each other.
 
 Alternatively to targeting a specific user, the attacker could also run an *untargeted attack* by bruteforcing passwords of multiple users.
 
@@ -175,14 +177,71 @@ In order to maintain an overview over the different attack scenarios, we introdu
   caption: "Notation for \"Unauthorized Access\" Attack Scenarios"
 ) <notation>
 
-For example, TSDO denotes the attack scenario in which one specific user account is targeted, using a specific password list tailored for this user and a distributed botnet, to achieve an account takeover.
+For example, TSDO denotes the attack scenario in which one specific user account is targeted, using a specific password list tailored for this user, and a distributed botnet, to achieve an account takeover.
 
 To describe a set of multiple attack scenarios, any letter can be replaced with `X` to denote "any". For example, UXXL denotes all attack scenarios aiming to lock out as many users as possible from their account.
 
 We should point out that there is no difference between XCXL and XSXL attacks because any set of passwords can be used to trigger an account lockout if such a system is implemented. Any other combination of attack properties is imaginable and should be subject to consideration.
 
 === NodeBB Default Countermeasures
-Before 
+Before discussing possible additional countermeasures, we first investigated the default countermeasures that NodeBB is configured with by default.
+
+In fact, NodeBB is configured by default with a setting of allowing a maximum of 5 consecutive login attempts, per user (within any time period). If this limit is exceeded, the user account is locked for 60 minutes. Successful logins reset the number of login attempts, so does the 60 minute lockout. Unfortunately, we could not find an explanation of this setting in the NodeBB documentation but it appears in the NodeBB admin panel under `Settings`~#sym.arrow~`Users`~#sym.arrow~`Account`~`Protection`, as can be seen in @accountSettings.
+
+#figure(
+  image("account_settings.png", height: 20%),
+  caption: "NodeBB Settings Related to Account Protection"
+) <accountSettings>
+
+The behaviour of this account locking mechanism can be verified in the NodeBB source code #footnote[https://github.com/NodeBB/NodeBB/blob/0acb2fcfe472cb745618e806e41af3e551580fad/src/user/auth.js#L16C5-L40]. A locked account can be recovered by the user themselves by receiving a password reset link via email.
+
+For validation and demonstration purposes, we developed a Python script #footnote[available at `unauthorized_access/bruteforce.py` in the GitHub submission] that executes a TCNX attack against a specific target user. We could validate that user accounts are indeed locked according to the setting. The script can easily be modified for untargeted attacks, and a modification for individual password lists per user is also possible.
+
+We could not identify any additional countermeasures by NodeBB against the threat models outlined in this section of the report, for example IP blocking. Therefore, the default protections do not differentiate between distributed and not-distributed attacks.
+
+Since the default account locking settings lead to a maximum of 120 login attempts per day (43.800 per year), they are mostly sufficient when used in combination with a strong password policy (which is configureable with NodeBB)#footnote[For example, there exist $62^16 approx 4 dot 10^28$ different alphanumeric passwords of length 16.]. Therefore, NodeBB by default effectively protects against TCXO attacks. For TSXO attacks, it should be noted that a targeted attack with a manageable list of possible password candidates could be run in the background over a long period of time without the user noticing.
+
+NodeBBs protection against UXXO attacks are not sufficient because a single attacker can guess 43.800 passwords per year, *per user*. Assuming a large online forum with 100.000 users, this leads to a total amount of 4.4 billion guesses per year, which is not an acceptable risk, even if a strong password policy is employed. It is possible even among long passwords to choose a weak password that is not detectable automatically. Some users will choose these passwords, allowing their account to be taken over with this attack.
+
+Finally, NodeBBs countermeasures against XXXL account lockout attacks are effective in the sense that a user can always reset a lockout period by receiving a password reset link via email. However, this comes with two limitations: First, being required to reset your password via email is in some sense a degradation in availability; and second, there is nothing preventing a malicious attacker to spam a lot of login requests, locking the account very fast again after a password reset, hindering the user to login at all. However, the default solution is better than nothing, and the request spamming could easily be mitigated by, for example, a web proxy in front of the application.
+
+The default situation is summarized in @defaultMitigations.
+
+#let tableColors = (
+  none, none, none, none, none, none,
+  none, green, red, red, green, none,
+  none, red, red, red, red, none,
+  none, yellow, yellow, yellow, yellow, none,
+  none, none, none, none, none, none,
+  none, none, none, none, none, none,
+)
+#figure(
+  grid(
+    columns: (auto),
+    rows: (auto, auto),
+    gutter: 10pt,
+    tablex(
+      columns: (20pt, 50pt, 50pt, 50pt, 50pt, 20pt),
+      rows: (20pt, 50pt, 50pt, 50pt, 50pt, 20pt),
+      align: horizon + center,
+      fill: (col, row) => tableColors.at(col + 6*row),
+      [], [*T*], colspanx(2)[*untargeted*], [*T*], [],
+      [*C*], [TCDO], [UCDO], [UCNO], [TCNO], rowspanx(2, rotate(-90deg, text(hyphenate: false)[*takeover*])),
+      rowspanx(2, rotate(-90deg, text(hyphenate: false)[*specific*])), [TSDO], [USDO], [USNO], [TSNO],
+      rowspanx(2)[TXDL], rowspanx(2)[UXDL], rowspanx(2)[UXNL], rowspanx(2)[TXNL], rowspanx(2, rotate(-90deg, text(hyphenate: false)[*lockout*])),
+      [*C*],
+      [], colspanx(2)[*distributed*], colspanx(2)[*not distributed*],
+    ),
+    [Legend: #text(green)[■] good protection, #text(yellow)[■] some protection, #text(red)[■] no protection],
+    v(5pt)
+  ),
+  caption: "NodeBB Default Unauthorized Access Mitigations"
+) <defaultMitigations>
+
+
+
+// also out of scope: insecure passwords, can be configured in the admin panel
+// password reset links
 
 #pagebreak()
 == Unauthorized Administration <unauthorized-admin>
