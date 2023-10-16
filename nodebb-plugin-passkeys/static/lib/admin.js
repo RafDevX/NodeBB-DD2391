@@ -16,10 +16,10 @@ define('forum/admin/passkeys', ['api', 'alerts'], (api, alerts) => ({
     },
 
     getSelectedGroups() {
-        return [
-            // convert HTMLCollection to Array
-            ...document.getElementById('pwdlessEnforcedGroups').selectedOptions,
-        ].map((option) => option.value);
+        return Array.from(
+            document.getElementById('pwdlessEnforcedGroups').selectedOptions,
+            (option) => option.value
+        );
     },
 
     async savePwdlessEnforcedGroups() {
