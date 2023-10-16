@@ -147,10 +147,42 @@ measures, depending on the sensitivity of the information in the forum.
 
 #pagebreak()
 == Unauthorized Access
+=== Possible Attack Scenarios
+An attacker could target a *specific user* and try to bruteforce their password in an online attack. The attacker could use a list of *common passwords* such as from the SecLists project #footnote[https://github.com/danielmiessler/SecLists/tree/master/Passwords/Common-Credentials] or may have obtained a *specific list of passwords* that the target user uses on different websites, which could be likely candidates for the user's credentials for the NodeBB instance, or other likely passwords for that specific user.
 
-https://github.com/danielmiessler/SecLists/blob/master/Passwords/Common-Credentials/10-million-password-list-top-100000.txt
+Additionally, the attacker could facilitate a botnet to *distribute* their attack over many IP addresses instead of originating all requests from a single IP.
 
-// TODO 2 pages
+The goal of the attacker could either be to compromise *confidentiality and integrity* by guessing the user's password and taking over their account, or to compromise *availability* by triggering an account locking mechanism designed to prevent password guessing. These two aspects have to be thought together when designing countermeasures because the effectiveness of these countermeasures depend on each other. 
+
+Alternatively to targeting a specific user, the attacker could also run an *untargeted attack* by bruteforcing passwords of multiple users.
+
+All of these different attack variants can be arbitrarily combined.
+
+=== Taxonomy
+In order to maintain an overview over the different attack scenarios, we introduce a 4-letter notation to distinguish between the different kinds of attacks, which is outlined in @notation.
+
+#figure(
+  table(
+    columns: (auto, auto, auto, auto),
+    inset: 10pt,
+    align: (left, left, left, left),
+    [*Target*], [*Password List*], [*Distributed?*], [*Attacker Goal*],
+    [*`T`*: targeted \ *`U`*: untargeted],
+    [*`C`*: common list \ *`S`*: specific for (each) user],
+    [*`D`*: distributed \ *`N`*: not distributed],
+    [*`O`*: account takeover \ *`L`*: account lockout]
+  ),
+  caption: "Notation for \"Unauthorized Access\" Attack Scenarios"
+) <notation>
+
+For example, TSDO denotes the attack scenario in which one specific user account is targeted, using a specific password list tailored for this user and a distributed botnet, to achieve an account takeover.
+
+To describe a set of multiple attack scenarios, any letter can be replaced with `X` to denote "any". For example, UXXL denotes all attack scenarios aiming to lock out as many users as possible from their account.
+
+We should point out that there is no difference between XCXL and XSXL attacks because any set of passwords can be used to trigger an account lockout if such a system is implemented. Any other combination of attack properties is imaginable and should be subject to consideration.
+
+=== NodeBB Default Countermeasures
+Before 
 
 #pagebreak()
 == Unauthorized Administration <unauthorized-admin>
