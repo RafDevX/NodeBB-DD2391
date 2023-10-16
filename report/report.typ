@@ -186,7 +186,7 @@ We should point out that there is no difference between XCXL and XSXL attacks be
 === NodeBB Default Countermeasures
 Before discussing possible additional countermeasures, we first investigated the default countermeasures that NodeBB is configured with by default.
 
-In fact, NodeBB is configured by default with a setting of allowing a maximum of 5 consecutive login attempts, per user (within any time period). If this limit is exceeded, the user account is locked for 60 minutes. Successful logins reset the number of login attempts, so does the 60 minute lockout. Unfortunately, we could not find an explanation of this setting in the NodeBB documentation but it appears in the NodeBB admin panel under `Settings`~#sym.arrow~`Users`~#sym.arrow~`Account`~`Protection`, as can be seen in @accountSettings.
+In fact, NodeBB is configured by default with a setting of allowing a maximum of 5 login attempts per hour, per user (within any time period). If this limit is exceeded, the user account is locked for 60 minutes. Successful logins reset the number of login attempts, so does the 60 minute lockout. Unfortunately, we could not find an explanation of this setting in the NodeBB documentation but it appears in the NodeBB admin panel under `Settings`~#sym.arrow~`Users`~#sym.arrow~`Account`~`Protection`, as can be seen in @accountSettings.
 
 #figure(
   image("account_settings.png", height: 20%),
@@ -197,7 +197,7 @@ The behaviour of this account locking mechanism can be verified in the NodeBB so
 
 For validation and demonstration purposes, we developed a Python script #footnote[available at `unauthorized_access/bruteforce.py` in the GitHub submission] that executes a TCNX attack against a specific target user. We could validate that user accounts are indeed locked according to the setting. The script can easily be modified for untargeted attacks, and a modification for individual password lists per user is also possible.
 
-We could not identify any additional countermeasures by NodeBB against the threat models outlined in this section of the report, for example IP blocking. Therefore, the default protections do not differentiate between distributed and not-distributed attacks.
+We could not identify any additional countermeasures by NodeBB against the threat models outlined in this section of the report, for example automatic IP blocking (manual IP blocking is possible though). Therefore, the default protections do not differentiate between distributed and not-distributed attacks.
 
 Since the default account locking settings lead to a maximum of 120 login attempts per day (43.800 per year), they are mostly sufficient when used in combination with a strong password policy (which is configureable with NodeBB)#footnote[For example, there exist $62^16 approx 4 dot 10^28$ different alphanumeric passwords of length 16.]. Therefore, NodeBB by default effectively protects against TCXO attacks. For TSXO attacks, it should be noted that a targeted attack with a manageable list of possible password candidates could be run in the background over a long period of time without the user noticing.
 
@@ -238,10 +238,60 @@ The default situation is summarized in @defaultMitigations.
   caption: "NodeBB Default Unauthorized Access Mitigations"
 ) <defaultMitigations>
 
+=== Countermeasure: Login CAPTCHA
+For improving the security of the application with regard to the threat models outlined in this chapter, different additional countermeasures were considered. We chose to actually implement a login CAPTCHA to make automated login attempts less feasible.
 
+Such a CAPTCHA can be accomplished by installing the NodeBB plugin `nodebb-plugin-spam-be-gone` #footnote[https://github.com/akhoury/nodebb-plugin-spam-be-gone]. In addition to executing CAPTCHAs when a new post is created, it also supports Google reCAPTCHA #footnote[https://www.google.com/recaptcha] on the NodeBB login page.
 
-// also out of scope: insecure passwords, can be configured in the admin panel
-// password reset links
+The installlation is described in the appropriate README file of our GitHub repository. When setting up the plugin, we experienced issues such as error messages on the login page UI, either indicating a misconfiguration or a failed CAPTCHA, although the CAPTCHA was solved correctly. These issues could be resolved by making sure that a reCAPTCHA "v2" with checkbox "I am not a robot" API key is being used. Other options are not supported by the NodeBB plugin.
+
+With the CAPTCHA enabled while assuming that it indeed prevents almost all automated login attempts, the security considerations of our NodeBB instance change. It is no longer feasible to perform untargeted (UXXX) attacks because they require a lot of login attempts, which would have to be executed manually.
+
+Additionally, distributed (XXDX) attacks, as long as we limit our scope to botnets, are no longer feasible for the same reason.
+
+Nevertheless, TSNO attacks are still realistic, and it is still possible to force a targeted user into resetting their password with a non-distributed attack - meaning that TXNL attacks are not fully defended against.
+
+A full final overview is given in @finalMitigations.
+
+#let tableColors = (
+  none, none, none, none, none, none,
+  none, green, green, green, green, none,
+  none, green, green, green, red, none,
+  none, green, green, green, yellow, none,
+  none, none, none, none, none, none,
+  none, none, none, none, none, none,
+)
+#figure(
+  grid(
+    columns: (auto),
+    rows: (auto, auto),
+    gutter: 10pt,
+    tablex(
+      columns: (20pt, 50pt, 50pt, 50pt, 50pt, 20pt),
+      rows: (20pt, 50pt, 50pt, 50pt, 50pt, 20pt),
+      align: horizon + center,
+      fill: (col, row) => tableColors.at(col + 6*row),
+      [], [*T*], colspanx(2)[*untargeted*], [*T*], [],
+      [*C*], [TCDO], [UCDO], [UCNO], [TCNO], rowspanx(2, rotate(-90deg, text(hyphenate: false)[*takeover*])),
+      rowspanx(2, rotate(-90deg, text(hyphenate: false)[*specific*])), [TSDO], [USDO], [USNO], [TSNO],
+      rowspanx(2)[TXDL], rowspanx(2)[UXDL], rowspanx(2)[UXNL], rowspanx(2)[TXNL], rowspanx(2, rotate(-90deg, text(hyphenate: false)[*lockout*])),
+      [*C*],
+      [], colspanx(2)[*distributed*], colspanx(2)[*not distributed*],
+    ),
+    [Legend: #text(green)[■] good protection, #text(yellow)[■] some protection, #text(red)[■] no protection],
+    v(5pt)
+  ),
+  caption: "NodeBB Unauthorized Access Mitigations with CAPTCHA enabled"
+) <finalMitigations>
+
+=== Additional Considerations
+As outlined above, a secure password policy should be in place for the mitigations to be effective.
+
+Different approaches such as IP rate limiting and IP address blocking would be appropriate to further improve the security of the application.
+
+We also did not evaluate the security of password reset links sent out via email by NodeBB.
+
+Using Google reCAPTCHA has privacy implications, since every time a user visits the login site, a request is sent to Google. Evaluating these implications was out of scope for this report.
 
 #pagebreak()
 == Unauthorized Administration <unauthorized-admin>
