@@ -174,7 +174,7 @@ In order to maintain an overview over the different attack scenarios, we introdu
     [*`D`*: distributed \ *`N`*: not distributed],
     [*`O`*: account takeover \ *`L`*: account lockout]
   ),
-  caption: "Notation for \"Unauthorized Access\" Attack Scenarios"
+  caption: [Notation for _Unauthorized Access_ Attack Scenarios]
 ) <notation>
 
 For example, TSDO denotes the attack scenario in which one specific user account is targeted, using a specific password list tailored for this user, and a distributed botnet, to achieve an account takeover.
@@ -235,7 +235,7 @@ The default situation is summarized in @defaultMitigations.
     [Legend: #text(green)[■] good protection, #text(yellow)[■] some protection, #text(red)[■] no protection],
     v(5pt)
   ),
-  caption: "NodeBB Default Unauthorized Access Mitigations"
+  caption: [NodeBB Default _Unauthorized Access_ Mitigations]
 ) <defaultMitigations>
 
 === Countermeasure: Login CAPTCHA
@@ -281,7 +281,7 @@ A full final overview is given in @finalMitigations.
     [Legend: #text(green)[■] good protection, #text(yellow)[■] some protection, #text(red)[■] no protection],
     v(5pt)
   ),
-  caption: "NodeBB Unauthorized Access Mitigations with CAPTCHA enabled"
+  caption: [NodeBB _Unauthorized Access_ Mitigations with CAPTCHA enabled]
 ) <finalMitigations>
 
 === Additional Considerations
@@ -526,8 +526,16 @@ remaining group members until he was satisfied with the end product.
 
 #pagebreak()
 == Yannik Tausch
+While the different attack scenarios and possible mitigations of the _Unauthorized Access_ chapter were dicussed in our group, including the choice of selecting a login CAPTCHA as countermeasure, Yannik contributed the categorization of possible attack scenarios and their taxonomy to the _Unauthorized Access_ chapter of this report.
+Related to this chapter, he also researched the default countermeasures of NodeBB and evaluated their impact on the security of the application within the attack scenario taxonomy.
 
-// TODO 1 page
+Yannik also developed the password bruteforce Python script that can be used to demonstrate the strengths and weaknesses of the default NodeBB countermeasures against _Unauthorized Access_ attack scenarios.
+Additionally, he was responsible for implementing the login CAPTCHA countermeasure, including the solving of problems that occured during the setup.
+Also, Yannik put the entire _Unauthorized Access_ chapter of this report into actual words.
+
+Additionally, Yannik helped other group members with the Docker setup of the application and contributed his knowledge about the inisitialization of the MongoDB Docker container.
+
+Finally, Yannik was a reviewer of every chapter of this report he has not written himself.
 
 #pagebreak()
 #show bibliography: set heading(numbering: "1.")
