@@ -25,7 +25,7 @@ define('forum/account/passkeys', ['api', 'alerts', 'bootbox'], function (
 
     Settings.disableAuthn = () => {
         bootbox.confirm(
-            '[[passkeys:user.manage.disableAuthn]]',
+            '[[passkeys:user.manage.disable.confirm]]',
             function (confirm) {
                 if (confirm) {
                     api.del('/plugins/passkeys')
@@ -40,7 +40,7 @@ define('forum/account/passkeys', ['api', 'alerts', 'bootbox'], function (
         const self = this;
         self.classList.add('text-muted');
         const modal = bootbox.dialog({
-            message: '[[passkeys:authn.modal.content]]',
+            message: '[[passkeys:user.register.modal.content]]',
             closeButton: false,
             className: 'text-center',
         });
@@ -54,7 +54,7 @@ define('forum/account/passkeys', ['api', 'alerts', 'bootbox'], function (
 
                 api.post('/plugins/passkeys/register', response)
                     .then(() => {
-                        alerts.success('[[passkeys:authn.success]]');
+                        alerts.success('[[passkeys:user.register.success]]');
                         setTimeout(
                             document.location.reload.bind(document.location),
                             1000
@@ -65,7 +65,7 @@ define('forum/account/passkeys', ['api', 'alerts', 'bootbox'], function (
                 modal.modal('hide');
                 self.classList.remove('disabled');
                 alerts.alert({
-                    message: '[[passkeys:authn.error]]',
+                    message: '[[passkeys:user.register.error]]',
                     timeout: 2500,
                 });
             }

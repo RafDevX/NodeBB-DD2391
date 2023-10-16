@@ -30,7 +30,6 @@
 				&nbsp;&nbsp;&nbsp;&nbsp;
 				<a role="button" data-action="disableAuthn" class="{{{ if !hasPasskey }}}text-muted{{{ end }}}">[[passkeys:user.manage.disable]]</a>
 			</div>
-			<i class="fa fa-fw fa-key"></i> [[passkeys:choices.authn]]
 			<div class="clear"></div>
 		</div>
 	</div>

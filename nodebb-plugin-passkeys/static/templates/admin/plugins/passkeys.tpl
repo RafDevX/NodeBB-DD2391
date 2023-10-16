@@ -17,9 +17,12 @@
 						<li class="list-group-item">
 							<a href="{users.config.relative_path}/user/{users.userslug}">
 								<!-- IF ../picture -->
-								<img class="avatar" component="user/picture" style="--avatar-size: 32px;" src="{../picture}" itemprop="image" />
+								<img class="avatar" component="user/picture" style="--avatar-size: 32px;"
+									src="{../picture}" itemprop="image" />
 								<!-- ELSE -->
-								<div class="avatar" component="user/picture" style="--avatar-size: 32px; background-color: {../icon:bgColor};">{../icon:text}</div>
+								<div class="avatar" component="user/picture"
+									style="--avatar-size: 32px; background-color: {../icon:bgColor};">{../icon:text}
+								</div>
 								<!-- END -->
 								{users.username}
 							</a>
@@ -34,13 +37,15 @@
 				</div>
 
 				<div class="mb-4">
-					<h5 class="fw-bold tracking-tight settings-header">[[passkeys:admin.force_2fa]]</h5>
+					<h5 class="fw-bold tracking-tight settings-header">[[passkeys:admin.pwdless-enforced-groups.title]]
+					</h5>
 					<div class="mb-3">
 						<div class="form-group">
-							<label for="tfaEnforcedGroups">[[passkeys:admin.force_2fa.help]]</label>
-							<select class="form-select" id="tfaEnforcedGroups" name="tfaEnforcedGroups" multiple>
+							<label for="pwdlessEnforcedGroups">[[passkeys:admin.pwdless-enforced-groups.help]]</label>
+							<select class="form-select" id="pwdlessEnforcedGroups" name="pwdlessEnforcedGroups"
+								multiple>
 								<!-- BEGIN groups -->
-								<option value="{../name}">{../value}</option>
+								<option value="{../value}" {{{ if ../enabled }}}selected{{{ end }}}>{../name}</option>
 								<!-- END groups -->
 							</select>
 						</div>
