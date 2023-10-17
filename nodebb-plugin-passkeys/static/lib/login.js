@@ -28,7 +28,7 @@ define('forum/login/passkey', ['api', 'alerts'], (api, alerts) => ({
 
                 // hack to redirect as POST
                 const form = document.createElement('form');
-                form.method = 'post';
+                form.method = 'get';
                 form.action = '/auth/passkey';
 
                 const input = document.createElement('input');
