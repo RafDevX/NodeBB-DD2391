@@ -1,5 +1,13 @@
 # Unauthorized Access
-## Step-by-Step Manual
+## Bruteforce Script
+The bruteforce script `bruteforce.py` was developed for Python 3.11 or later but it probably also works with earlier 3.x versions of Python.
+
+To use it, follow these steps:
+1. `pip -r requirements.txt`
+2. Set the target user in the script (`alice` by default)
+3. Execute the script
+
+## Countermeasures Setup
 To set up the countermeasure explained in the report, follow these steps:
 
 1. Login as an administrator in NodeBB

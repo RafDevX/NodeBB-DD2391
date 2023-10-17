@@ -1,6 +1,5 @@
 import re
 import requests
-import time
 
 from enum import Enum, auto
 
@@ -69,8 +68,7 @@ def main():
             if response == ResponseType.LOCKED:
                 input("Account Locked. Enter to continue guessing...")
             count += 1
-            if count % 100 == 0:
-                print(f"Checked {count} passwords")
+            print(f"Checked {count} passwords")
 
 
 if __name__ == '__main__':

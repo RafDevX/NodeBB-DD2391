@@ -148,15 +148,17 @@ logs and network traffic, rotating passwords regularly, and other security
 measures, depending on the sensitivity of the information in the forum.
 
 #pagebreak()
-== Unauthorized Access
+== Unauthorized Access <unauthorizedAccess>
+
 === Possible Attack Scenarios
-An attacker could target a *specific user* and try to bruteforce their password in an online attack. The attacker could use a list of *common passwords* such as from the SecLists project #footnote[https://github.com/danielmiessler/SecLists/tree/master/Passwords/Common-Credentials] or may have obtained a *specific list of passwords* that the target user uses on different websites, which could be likely candidates for the user's credentials for the NodeBB instance, or other likely passwords for that specific user.
+An attacker could target a *specific user* and try to brute-force their password in an online attack. The attacker could use a list of *common passwords* such as from the SecLists project #footnote[https://github.com/danielmiessler/SecLists/tree/master/Passwords/Common-Credentials] or may have obtained a *specific list of passwords* that the target user uses on different websites, which could be likely candidates for the user's credentials for the NodeBB instance, or other likely passwords for that specific user.
 
 Additionally, the attacker could facilitate a botnet to *distribute* their attack over many IP addresses instead of originating all requests from a single IP.
 
-The goal of the attacker could either be to compromise *confidentiality and integrity* by guessing the user's password and taking over their account, or to compromise *availability* by triggering an account locking mechanism designed to prevent password guessing. Although compromosing avilability is strictly speaking not part of somebody gaining "unauthorized access", these two aspects have to be thought together when designing countermeasures because the effectiveness of these countermeasures depend on each other.
+The attacker's goal could be either to compromise *confidentiality* and *integrity* by guessing the user's password and taking over their account, or to compromise *availability* by triggering an account lockout mechanism designed to prevent password guessing.
+Although compromising availability is strictly speaking not part of somebody gaining "unauthorized access", these two aspects have to be considered together when designing countermeasures, as their effectiveness depends on each other.
 
-Alternatively to targeting a specific user, the attacker could also run an *untargeted attack* by bruteforcing passwords of multiple users.
+Alternatively to targeting a specific user, the attacker could also run an *untargeted attack* by brute-forcing passwords of multiple users.
 
 All of these different attack variants can be arbitrarily combined.
 
@@ -179,14 +181,16 @@ In order to maintain an overview over the different attack scenarios, we introdu
 
 For example, TSDO denotes the attack scenario in which one specific user account is targeted, using a specific password list tailored for this user, and a distributed botnet, to achieve an account takeover.
 
-To describe a set of multiple attack scenarios, any letter can be replaced with `X` to denote "any". For example, UXXL denotes all attack scenarios aiming to lock out as many users as possible from their account.
+To describe a set of multiple attack scenarios, any letter can be replaced with `X` to denote "any". For example, UXXL denotes all attack scenarios aiming to lock out as many users as possible from their accounts.
 
 We should point out that there is no difference between XCXL and XSXL attacks because any set of passwords can be used to trigger an account lockout if such a system is implemented. Any other combination of attack properties is imaginable and should be subject to consideration.
 
 === NodeBB Default Countermeasures
-Before discussing possible additional countermeasures, we first investigated the default countermeasures that NodeBB is configured with by default.
+Before discussing possible additional countermeasures, we first examined the countermeasures that NodeBB is configured with by default.
 
-In fact, NodeBB is configured by default with a setting of allowing a maximum of 5 login attempts per hour, per user (within any time period). If this limit is exceeded, the user account is locked for 60 minutes. Successful logins reset the number of login attempts, so does the 60 minute lockout. Unfortunately, we could not find an explanation of this setting in the NodeBB documentation but it appears in the NodeBB admin panel under `Settings`~#sym.arrow~`Users`~#sym.arrow~`Account`~`Protection`, as can be seen in @accountSettings.
+These countermeasures include a setting of allowing a maximum of 5 login attempts per hour, per user.
+If this limit is exceeded, the user account is locked for 60 minutes. Successful logins reset the number of login attempts, and so does the 60-minute lockout.
+Unfortunately, we could not find an explanation of this setting in the NodeBB documentation but it appears in the NodeBB admin panel under `Settings`~#sym.arrow~`Users`~#sym.arrow~`Account`~`Protection`, as can be seen in @accountSettings.
 
 #figure(
   image("account_settings.png", height: 20%),
@@ -197,13 +201,15 @@ The behaviour of this account locking mechanism can be verified in the NodeBB so
 
 For validation and demonstration purposes, we developed a Python script #footnote[available at `unauthorized_access/bruteforce.py` in the GitHub submission] that executes a TCNX attack against a specific target user. We could validate that user accounts are indeed locked according to the setting. The script can easily be modified for untargeted attacks, and a modification for individual password lists per user is also possible.
 
-We could not identify any additional countermeasures by NodeBB against the threat models outlined in this section of the report, for example automatic IP blocking (manual IP blocking is possible though). Therefore, the default protections do not differentiate between distributed and not-distributed attacks.
+We could not identify any additional countermeasures by NodeBB against the threat models outlined in this section of the report, for example automatic IP blocking (manual IP blocking is possible though). Therefore, the default protections do not differentiate between distributed and non-distributed attacks.
 
-Since the default account locking settings lead to a maximum of 120 login attempts per day (43.800 per year), they are mostly sufficient when used in combination with a strong password policy (which is configureable with NodeBB)#footnote[For example, there exist $62^16 approx 4 dot 10^28$ different alphanumeric passwords of length 16.]. Therefore, NodeBB by default effectively protects against TCXO attacks. For TSXO attacks, it should be noted that a targeted attack with a manageable list of possible password candidates could be run in the background over a long period of time without the user noticing.
+Since the default account locking settings lead to a maximum of 120 login attempts per day (43.800 per year), they are mostly sufficient when used in combination with a strong password policy (which is configurable with NodeBB)#footnote[For example, there exist $62^16 approx 4 dot 10^28$ different alphanumeric passwords of length 16.]. Therefore, NodeBB by default effectively protects against TCXO attacks. For TSXO attacks, it should be noted that a targeted attack with a manageable list of possible password candidates could be run in the background over a long period of time without the user noticing.
 
-NodeBBs protection against UXXO attacks are not sufficient because a single attacker can guess 43.800 passwords per year, *per user*. Assuming a large online forum with 100.000 users, this leads to a total amount of 4.4 billion guesses per year, which is not an acceptable risk, even if a strong password policy is employed. It is possible even among long passwords to choose a weak password that is not detectable automatically. Some users will choose these passwords, allowing their account to be taken over with this attack.
+NodeBB's protection against UXXO attacks are not sufficient because a single attacker can guess 43.800 passwords per year, _per user_. Assuming a large online forum with 100.000 users, this leads to a total amount of 4.4 billion guesses per year, which is not an acceptable risk, even if a strong password policy is employed. It is possible even among long passwords to choose a weak password that is not detectable automatically. Some users will choose these passwords, allowing their account to be taken over with this attack.
 
-Finally, NodeBBs countermeasures against XXXL account lockout attacks are effective in the sense that a user can always reset a lockout period by receiving a password reset link via email. However, this comes with two limitations: First, being required to reset your password via email is in some sense a degradation in availability; and second, there is nothing preventing a malicious attacker to spam a lot of login requests, locking the account very fast again after a password reset, hindering the user to login at all. However, the default solution is better than nothing, and the request spamming could easily be mitigated by, for example, a web proxy in front of the application.
+Finally, NodeBB's countermeasures against XXXL account lockout attacks are effective in the sense that a user can always reset a lockout period by receiving a password reset link via email.
+However, this comes with two limitations: First, being required to reset your password via email is in some sense a degradation in availability; and second, there is nothing preventing a malicious attacker from spamming a large number of login requests, locking the account again faster than time it takes the user to log in after unlocking it.
+However, the default solution is better than nothing, and the request spamming could easily be mitigated by, for example, a web proxy in front of the application.
 
 The default situation is summarized in @defaultMitigations.
 
@@ -239,13 +245,14 @@ The default situation is summarized in @defaultMitigations.
 ) <defaultMitigations>
 
 === Countermeasure: Login CAPTCHA
-For improving the security of the application with regard to the threat models outlined in this chapter, different additional countermeasures were considered. We chose to actually implement a login CAPTCHA to make automated login attempts less feasible.
+To improve the security of the application with regard to the threat models outlined in this chapter, different additional countermeasures were considered.
+We chose to actually implement a CAPTCHA challenge that has to solved for each login attempt to make automated login attempts less feasible.
 
 Such a CAPTCHA can be accomplished by installing the NodeBB plugin `nodebb-plugin-spam-be-gone` #footnote[https://github.com/akhoury/nodebb-plugin-spam-be-gone]. In addition to executing CAPTCHAs when a new post is created, it also supports Google reCAPTCHA #footnote[https://www.google.com/recaptcha] on the NodeBB login page.
 
-The installlation is described in the appropriate README file of our GitHub repository. When setting up the plugin, we experienced issues such as error messages on the login page UI, either indicating a misconfiguration or a failed CAPTCHA, although the CAPTCHA was solved correctly. These issues could be resolved by making sure that a reCAPTCHA "v2" with checkbox "I am not a robot" API key is being used. Other options are not supported by the NodeBB plugin.
+The installation is described in the appropriate README file of our GitHub repository. When setting up the plugin, we experienced issues such as error messages on the login page UI, either indicating a misconfiguration or a failed CAPTCHA, although the CAPTCHA was solved correctly. These issues could be resolved by making sure that a reCAPTCHA "v2" with checkbox "I am not a robot" API key is being used. Other options are not supported by the NodeBB plugin.
 
-With the CAPTCHA enabled while assuming that it indeed prevents almost all automated login attempts, the security considerations of our NodeBB instance change. It is no longer feasible to perform untargeted (UXXX) attacks because they require a lot of login attempts, which would have to be executed manually.
+With the CAPTCHA enabled while assuming that it indeed prevents almost all automated login attempts, the security considerations of our NodeBB instance change. It is no longer feasible to perform untargeted (UXXX) attacks because they require too many login attempts, which would have to be executed manually.
 
 Additionally, distributed (XXDX) attacks, as long as we limit our scope to botnets, are no longer feasible for the same reason.
 
@@ -292,6 +299,11 @@ Different approaches such as IP rate limiting and IP address blocking would be a
 We also did not evaluate the security of password reset links sent out via email by NodeBB.
 
 Using Google reCAPTCHA has privacy implications, since every time a user visits the login site, a request is sent to Google. Evaluating these implications was out of scope for this report.
+
+Besides that, CAPTCHAs usually negatively impact the UX of an application.
+However, when implemented correctly, they usually present a good tradeoff between usability and security, as the security benefits can be immense (as outlined in this chapter).
+Modern CAPTCHA technologies such as Google reCAPTCHA v3 #footnote[https://developers.google.com/recaptcha/docs/v3] (which is unfortunately not supported by `nodebb-plugin-spam-be-gone`) allow verifying the legitimacy of a request without user intervention by collecting data in the background, removing the UX impact.
+Evaluating these kinds of CAPTCHAs for our application was out of scope for this report.
 
 #pagebreak()
 == Unauthorized Administration <unauthorized-admin>
@@ -526,16 +538,16 @@ remaining group members until he was satisfied with the end product.
 
 #pagebreak()
 == Yannik Tausch
-While the different attack scenarios and possible mitigations of the _Unauthorized Access_ chapter were dicussed in our group, including the choice of selecting a login CAPTCHA as countermeasure, Yannik contributed the categorization of possible attack scenarios and their taxonomy to the _Unauthorized Access_ chapter of this report.
+While the different attack scenarios and possible mitigations of the _Unauthorized Access_ chapter were discussed in our group, including the choice of selecting a login CAPTCHA as a countermeasure, Yannik contributed the categorization of possible attack scenarios and their taxonomy to the _Unauthorized Access_ chapter of this report.
 Related to this chapter, he also researched the default countermeasures of NodeBB and evaluated their impact on the security of the application within the attack scenario taxonomy.
 
-Yannik also developed the password bruteforce Python script that can be used to demonstrate the strengths and weaknesses of the default NodeBB countermeasures against _Unauthorized Access_ attack scenarios.
-Additionally, he was responsible for implementing the login CAPTCHA countermeasure, including the solving of problems that occured during the setup.
+Yannik also developed the password brute-force Python script that can be used to demonstrate the strengths and weaknesses of the default NodeBB countermeasures against _Unauthorized Access_ attack scenarios.
+Additionally, he was responsible for implementing the login CAPTCHA countermeasure, including the solving of problems that occurred during the setup.
 Also, Yannik put the entire _Unauthorized Access_ chapter of this report into actual words.
 
-Additionally, Yannik helped other group members with the Docker setup of the application and contributed his knowledge about the inisitialization of the MongoDB Docker container.
+Additionally, Yannik helped other group members with the Docker setup of the application and contributed his knowledge about the initialization of the MongoDB Docker container.
 
-Finally, Yannik was a reviewer of every chapter of this report he has not written himself.
+Finally, Yannik reviewed every chapter of this report he did not write himself.
 
 #pagebreak()
 #show bibliography: set heading(numbering: "1.")
