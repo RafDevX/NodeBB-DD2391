@@ -64,8 +64,4 @@ controllers.renderSettingsPage = async (req, res) => {
     });
 };
 
-controllers.renderLoginPage = async (req, res) => {
-    res.render('login/passkey');
-};
-
 module.exports = controllers;
