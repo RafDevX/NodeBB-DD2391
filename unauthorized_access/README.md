@@ -11,7 +11,7 @@ To use it, follow these steps:
 To set up the countermeasure explained in the report, follow these steps:
 
 1. Login as an administrator in NodeBB
-2. Navigate to `Admin` &rarr; `Extend` &rarr; `Plugins` &rarr; `Find Plugins`
+2. Navigate to `Admin` &rarr; `Extend` &rarr; `Plugins`
 3. Install the `nodebb-plugin-spam-be-gone` plugin
 4. Activate the plugin
 5. Click on `Restart & Rebuild`, as instructed by the UI.
