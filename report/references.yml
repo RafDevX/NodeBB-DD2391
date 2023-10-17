@@ -120,3 +120,25 @@ nodebb-passkeys:
     type: Web
     title: NodeBB Community
     url: https://community.nodebb.org/
+w3c-webauthn:
+  type: reference
+  title: "Web Authentication: An API for accessing Public Key Credentials Level 2"
+  date: 2021-04-08
+  url:
+    value: https://www.w3.org/TR/webauthn/
+    date: 2023-10-17
+cose-algos:
+  type: reference
+  title: "CBOR Object Signing and Encryption (COSE): Algorithms"
+  date: 2017-01-11
+  url:
+    value: https://www.w3.org/TR/webauthn/
+    date: 2023-10-17
+cose-to-jwk:
+  type: repository
+  title:
+    value: cose-to-jwk
+    verbatim: true
+  url:
+    value: https://github.com/apowers313/cose-to-jwk
+    date: 2023-10-17

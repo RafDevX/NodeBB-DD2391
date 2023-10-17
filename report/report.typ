@@ -183,11 +183,25 @@ security keys support in the two-factor plugin for NodeBB @nodebb-plugin-2factor
 is very similar to what we want to implement, so we used it as inspiration for this
 proof-of-concept.
 
+We extended our `Dockerfile` to copy the plugin's files into the container and automatically install it to NodeBB, so an administrator only needs to activate the plugin in the Admin Control Panel ("Admin" > "Extend" > "Plugins" > "`nodebb-plugin-passkeys`" > "Activate" > "Confirm" > "Rebuild & Restart" > "Confirm").
+
+This simple procedure will instantly enable all users site-wide to register a passkey to their account, by accessing "Settings" > "Passkeys", allowing them to opt-in to a more secure experience. After registering a passkey, users can use it to sign into the website using the "Login with a Passkey" button shown on the regular login page, under "Alternative Logins". In order to support the login flow, we implemented a custom login strategy in accordance to the `passport` specification. Our plugin supplies this strategy to NodeBB, which invokes it when it is necessary to direct, validate, or support a user sign-in process.
+
+There is a plethora of different parameters to tune in relation to WebAuthn @w3c-webauthn (the W3C standard supporting passkeys) operations, so we had to make certain design decisions in accordance to what we believed to be best in terms of security, feasability, and user experience. Of these design choices, we point out:
+
+- We require both user presence and user verification for an authentication attempt to be successful, ensuring that the authenticator makes use of a second authentication factor (i.e., prompts for a PIN code, biometric credentials, or another equivalent method);
+- In order to simplify the passkey registration process, and to limit the amount of personal identifying information provided to us, we do not require any form of authenticator attestation by a Certificate Authority;
+- We carefully selected which algorithms @cose-algos to accept, and in which order of preference, having settled on: ECDSA w/ SHA-512 (COSE `-36`), ECDSA w/ SHA-384 (COSE `-35`), ECDSA w/ SHA-256 (COSE `-7`), RSASSA-PSS w/ SHA-512 (COSE `-39`), RSASSA-PSS w/ SHA-384 (COSE `-38`), RSASSA-PSS w/ SHA-256 (COSE `-37`), RSASSA-PKCS1-v1_5 w/ SHA-512 (COSE `-259`), RSASSA-PKCS1-v1_5 w/ SHA-384 (COSE `-258`), and finally RSASSA-PKCS1-v1_5 w/ SHA-256 (COSE `-257`). Originally we planned on listing COSE algorithm `-8`, EdDSA, as our preferential algorithm, but one of our dependencies @cose-to-jwk does not yet support it.
+
+Moreover, we implemented a *Per-Group Passwordless Enforcement* feature that allows administrators (through "Admin" > "Plugins" > "Passkeys") to configure passwordless requirements for specific groups of users (such as the `administrators` group, or even all `registered-users`). Any groups selected using this feature will require its members to register a passkey if they have not already (users cannot view any pages or perform any action until they do), and members of such a group can no longer use their password to login after they have registered a passkey, therefore being forced to always login using a passkey, which significantly improves security as outlined above. #text(red)[The administration page also shows a listing of all users with registered passkeys, allowing administrators to revoke a specific user's passkeys if necessary.] We believe this feature is essential to help further the site's security, and our implementation supporting enforcement based on arbitrary groups gives administrators an enormous flexibility. Evidently, to solve this specific #smallcaps[Unauthorized Administration] problem for this project, we recommend enabling passwordless enforcement for the `administrators` group.
+
 // TODO
 //
 // explain how registration/login flows work
 // talk about forcing passkeys for administrators
 // difficulties: talk about the lack of documentation/libraries, as well as similarities between security keys, which makes it difficult to find information online
+// maybe add more sources
+// talk about 2FA plugin (basically just give step-by-step on how to enable it and set admin group)
 
 #pagebreak()
 = Group Members
