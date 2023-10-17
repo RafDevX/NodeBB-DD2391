@@ -113,7 +113,7 @@ plugin.addRoutes = async ({ router, middleware, helpers }) => {
                 'displayname',
             ]);
             registrationRequest.user = {
-                id: b64uEncode(Number.toString(req.uid)),
+                id: b64uEncode(String(req.uid)),
                 name: userData.username,
                 displayName: userData.displayname,
             };
@@ -247,11 +247,6 @@ plugin.getLoginStrategy = function (strategies, callback) {
     passport.use(
         'passkey',
         new PasskeyStrategy(
-            {
-                loginPagePath: '/login/passkey',
-                successPagePath: '/',
-                failurePagePath: '/login',
-            },
             async (req, assertion) => {
                 const encodedUserHandle = assertion.response?.userHandle;
                 if (typeof encodedUserHandle !== 'string') {
@@ -304,13 +299,13 @@ plugin.getLoginStrategy = function (strategies, callback) {
 
     strategies.push({
         name: 'passkey',
-        url: '/auth/passkey',
+        url: '/login/passkey',
         urlMethod: 'get',
         callbackURL: '/auth/passkey',
-        callbackMethod: 'post',
+        callbackMethod: 'get',
         checkState: false,
-        successUrl: '/auth/passkey', // cannot be / directly as we need to absorb the POST into GET
-        failureUrl: '/auth/passkey', // cannot be /login directly as we need to absorb the POST into GET
+        successUrl: '/',
+        failureUrl: '/login/passkey?fail',
         icon: 'fa-key',
         labels: {
             login: '[[passkeys:login-with-passkey]]',
