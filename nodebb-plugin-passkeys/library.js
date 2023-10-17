@@ -61,13 +61,6 @@ plugin.init = async ({ router, middleware }) => {
         controllers.renderSettingsPage
     );
 
-    routeHelpers.setupPageRoute(
-        router,
-        '/login/passkey',
-        [middleware.pluginHooks],
-        controllers.renderLoginPage
-    );
-
     // Fido2Lib instantiation
     // https://www.passkeys.com/guides
     plugin._f2l = new Fido2Lib({
@@ -82,7 +75,7 @@ plugin.init = async ({ router, middleware }) => {
 
     // Configure passkeys path exemptions
     let prefixes = ['/reset', '/confirm'];
-    let pages = ['/login/passkey', '/register/complete'];
+    let pages = ['/register/complete'];
     let paths = ['/api/v3/plugins/passkeys/register', '/auth/passkey'];
     ({ prefixes, pages, paths } = await plugins.hooks.fire(
         'filter:passkeys.exemptions',
@@ -299,7 +292,7 @@ plugin.getLoginStrategy = function (strategies, callback) {
 
     strategies.push({
         name: 'passkey',
-        url: '/login/passkey',
+        url: '/auth/passkey',
         urlMethod: 'get',
         callbackURL: '/auth/passkey',
         callbackMethod: 'get',
