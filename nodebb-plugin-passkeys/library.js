@@ -305,7 +305,7 @@ plugin.getLoginStrategy = function (strategies, callback) {
         callbackMethod: 'get',
         checkState: false,
         successUrl: '/',
-        failureUrl: '/login/passkey?fail',
+        failureUrl: '/login?error=Unauthorized',
         icon: 'fa-key',
         labels: {
             login: '[[passkeys:login-with-passkey]]',
