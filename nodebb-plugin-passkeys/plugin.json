@@ -16,7 +16,7 @@
     },
     "modules": {
         "../client/account/passkeys.js": "./static/lib/settings.js",
-        "../client/login/passkey.js": "./static/lib/login.js",
+        "../client/login.js": "./static/lib/login.js",
         "../admin/plugins/passkeys.js": "./static/lib/admin.js"
     },
     "templates": "static/templates",

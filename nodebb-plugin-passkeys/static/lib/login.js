@@ -1,9 +1,10 @@
 'use strict';
 
-define('forum/login/passkey', ['api', 'alerts'], (api, alerts) => ({
+define('forum/login', ['api', 'alerts'], (api, alerts) => ({
     init() {
         const btn = this.getButton();
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (event) => {
+            event.preventDefault();
             if (btn.disabled) return;
             btn.disabled = true;
 
@@ -12,7 +13,7 @@ define('forum/login/passkey', ['api', 'alerts'], (api, alerts) => ({
     },
 
     getButton() {
-        return document.querySelector('[data-action="triggerLogin"]');
+        return document.querySelector('.alt-logins .passkey a.btn');
     },
 
     async triggerLogin() {
@@ -26,7 +27,7 @@ define('forum/login/passkey', ['api', 'alerts'], (api, alerts) => ({
 
                 alerts.info('[[passkeys:logging-in]]');
 
-                // hack to redirect as POST
+                // hack to redirect as GET
                 const form = document.createElement('form');
                 form.method = 'get';
                 form.action = '/auth/passkey';
