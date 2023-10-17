@@ -151,7 +151,7 @@ In the default configuration of NodeBB, user accounts are only protected by a
 username and a password. Even though passwords can be relatively secure if they
 are long, unique and randomly generated, *they might still be compromised*, for
 example, by phishing attacks. This is especially problematic for site
-administrators, whose accounts can access and modify site settings, forum posts,
+administrators, whose accounts can access and modify site settings, forum posts, user information,
 and other sensitive data.
 
 As such, we would like to *lessen the impact in case of compromised
@@ -160,30 +160,27 @@ administrator credentials*. One way to achieve that goal is through the use of
 plugin, `nodebb-plugin-2factor` @nodebb-plugin-2factor, and is installed by
 default. However, it has to be enabled manually from the administrator panel.
 
-Instead of pursuing this approach, however, we *decided to support Passkeys*, a
-new secure passwordless authentication method by the FIDO Alliance, based on
-public-key cryptography @fido-passkeys. Passkeys also count as two factors,
-completely replacing a password and one-time passwords (OTP), since they are
-validated on-device with biometrics or a PIN code. They are also phishing
+#text(red)[In addition to pursuing this approach], however, we *decided to support Passkeys*, a
+new secure passwordless authentication method developed by the FIDO Alliance, based on
+public-key cryptography @fido-passkeys. Passkeys rely on an _authenticator_, which might be a secure chip on the user's device (e.g., a mobile phone) or a separate hardware authentication device (such as a Security Key, like a YubiKey). This authenticator holds private keys for each associated passkey and performs the necessary cryptographic operations to securely identify the user to a _relying party_, such as the NodeBB website: the relying party generates a challenge which the authenticator cryptographically signs, enabling the relying party to verify that the provided challenge response has been signed by the private key associated with the public key that was mapped to the user during registration.
+
+Using passkeys also counts as two-factor authentication,
+completely replacing combinations such as a password + one-time passwords (OTP), since they are
+validated on-device with biometrics or a PIN code, therefore requiring both a "something you have" factor and a "something you are"/"something you know" factor. They are also phishing
 resistant, which neither passwords nor OTP are, due to their cryptographic
 nature: the private key is never sent to the server, and the browser validates
 that the origin matches the expected value before forwarding the authentication
-response. Furthermore, they are also more convenient because users don't have to
+response. Furthermore, they are also more convenient because users do not have to
 remember passwords and each passkey is only used in a single site. Additionally,
-passkeys also replace usernames, since the authentication challenge response
-also includes a unique identifier of the user associated with the passkey.
+passkeys also replace user-inputted usernames, since the authentication challenge response
+also includes a unique identifier of the user associated with the passkey, and websites store mappings between users and their registered passkey public keys.
 
-As a downside, passkeys support is still being rolled out at the moment of
-writing, which means not every device and operating system supports creating,
-storing and using passkeys @passkeys-devices.
+All of these properties make passkeys a very compelling option for secure
+authentication. As such, we came to the conclusion that adding passkey support to NodeBB would be the most effective way of mitigating situations where administrator users' passwords are compromised.
 
-All of these properties make Passkeys a very compelling option for secure
-authentication. As such, this is what we will be using to solve this threat.
-
-Since this technology is new, there is still no NodeBB plugin for Passkeys
-@nodebb-passkeys, so we had to create our own. Fortunately, the hardware
+The downside for passkeys is that support is still being rolled out at the present time, which means not every device and operating systm supports creating, storing and using passkeys @passkeys-devices. This is also true for the NodeBB landscape in specific, where there is still no NodeBB plugin for passkeys @nodebb-passkeys, due to the technology being so new, so we had to develop our own. Fortunately, the hardware
 security keys support in the two-factor plugin for NodeBB @nodebb-plugin-2factor
-is very similar to what we want to implement, so we used it as a base for this
+is very similar to what we want to implement, so we used it as inspiration for this
 proof-of-concept.
 
 // TODO
