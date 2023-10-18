@@ -149,7 +149,7 @@ measures, depending on the sensitivity of the information in the forum.
 
 In the default configuration of NodeBB, user accounts are only protected by a
 username and a password. Even though passwords can be relatively secure if they
-are long, unique and randomly generated, *they might still be compromised*, for
+are long, unique, and randomly generated, *they might still be compromised*, for
 example, by phishing attacks. This is especially problematic for site
 administrators, whose accounts can access and modify site settings, forum posts, user information,
 and other sensitive data.
@@ -158,11 +158,11 @@ As such, we would like to *lessen the impact in case of compromised
 administrator credentials*. One way to achieve that goal is through the use of
 *Two-Factor Authentication*, which is readily available as an official NodeBB
 plugin, `nodebb-plugin-2factor` @nodebb-plugin-2factor, and is installed by
-default. However, it has to be enabled manually from the administrator panel.
+default, though it has to be enabled manually from the administrator panel.
 
-#text(red)[In addition to pursuing this approach], however, we *decided to support Passkeys*, a
+Instead of pursuing this approach, however, we *decided to support Passkeys*, a
 new secure passwordless authentication method developed by the FIDO Alliance, based on
-public-key cryptography @fido-passkeys. Passkeys rely on an _authenticator_, which might be a secure chip on the user's device (e.g., a mobile phone) or a separate hardware authentication device (such as a Security Key, like a YubiKey). This authenticator holds private keys for each associated passkey and performs the necessary cryptographic operations to securely identify the user to a _relying party_, such as the NodeBB website: the relying party generates a challenge which the authenticator cryptographically signs, enabling the relying party to verify that the provided challenge response has been signed by the private key associated with the public key that was mapped to the user during registration.
+public-key cryptography @fido-passkeys. Passkeys rely on an _authenticator_, which might be a secure chip on the user's device (e.g., a mobile phone) or a separate hardware authentication device (such as a security key, like a YubiKey). This authenticator holds private keys for each associated passkey and performs the necessary cryptographic operations to securely identify the user to a _relying party_, such as the NodeBB website: the relying party generates a challenge which the authenticator cryptographically signs, enabling the relying party to verify that the provided challenge response has been signed by the private key associated with the public key that was mapped to the user during registration.
 
 Using passkeys also counts as two-factor authentication,
 completely replacing combinations such as a password + one-time passwords (OTP), since they are
@@ -171,29 +171,29 @@ resistant, which neither passwords nor OTP are, due to their cryptographic
 nature: the private key is never sent to the server, and the browser validates
 that the origin matches the expected value before forwarding the authentication
 response. Furthermore, they are also more convenient because users do not have to
-remember passwords and each passkey is only used in a single site. Additionally,
-passkeys also replace user-inputted usernames, since the authentication challenge response
+remember passwords, and each passkey is only used in a single site. Additionally,
+passkeys obsolete the need for users to enter their username, since the authentication challenge response
 also includes a unique identifier of the user associated with the passkey, and websites store mappings between users and their registered passkey public keys.
 
 All of these properties make passkeys a very compelling option for secure
 authentication. As such, we came to the conclusion that adding passkey support to NodeBB would be the most effective way of mitigating situations where administrator users' passwords are compromised.
 
-The downside for passkeys is that support is still being rolled out at the present time, which means not every device and operating systm supports creating, storing and using passkeys @passkeys-devices. This is also true for the NodeBB landscape in specific, where there is still no NodeBB plugin for passkeys @nodebb-passkeys, due to the technology being so new, so we had to develop our own. Fortunately, the hardware
+The downside for passkeys is that support is still being rolled out, which means not every device and operating system supports creating, storing, and using passkeys @passkeys-devices. This is also true for the NodeBB landscape in particular, where there is still no NodeBB plugin for passkeys @nodebb-passkeys, due to the technology being so new, so we had to develop our own. Fortunately, the hardware
 security keys support in the two-factor plugin for NodeBB @nodebb-plugin-2factor
 is very similar to what we want to implement, so we used it as inspiration for this
 proof-of-concept.
 
 We extended our `Dockerfile` to copy the plugin's files into the container and automatically install it to NodeBB, so an administrator only needs to activate the plugin in the Admin Control Panel ("Admin" > "Extend" > "Plugins" > "`nodebb-plugin-passkeys`" > "Activate" > "Confirm" > "Rebuild & Restart" > "Confirm").
 
-This simple procedure will instantly enable all users site-wide to register a passkey to their account, by accessing "Settings" > "Passkeys", allowing them to opt-in to a more secure experience. After registering a passkey, users can use it to sign into the website using the "Login with a Passkey" button shown on the regular login page, under "Alternative Logins". In order to support the login flow, we implemented a custom login strategy in accordance to the `passport` specification. Our plugin supplies this strategy to NodeBB, which invokes it when it is necessary to direct, validate, or support a user sign-in process.
+This simple procedure will instantly enable all users site-wide to register a passkey to their account, by accessing "Settings" > "Passkeys", allowing them to opt-in to a more secure experience. After registering a passkey, users can use it to sign into the website using the "Login with a Passkey" button shown on the regular login page, under "Alternative Logins". In order to support the login flow, we implemented a custom login strategy in accordance with `passport`'s specification @passport. Our plugin supplies this strategy to NodeBB, which invokes it when it is necessary to direct, validate, or support a user sign-in process.
 
-There is a plethora of different parameters to tune in relation to WebAuthn @w3c-webauthn (the W3C standard supporting passkeys) operations, so we had to make certain design decisions in accordance to what we believed to be best in terms of security, feasability, and user experience. Of these design choices, we point out:
+There is a plethora of different parameters to tune in relation to WebAuthn @w3c-webauthn (the W3C standard supporting passkeys) operations, so we had to make certain design decisions in accordance with what we believed to be best in terms of security, feasibility, and user experience. Of these design choices, we point out:
 
 - We require both user presence and user verification for an authentication attempt to be successful, ensuring that the authenticator makes use of a second authentication factor (i.e., prompts for a PIN code, biometric credentials, or another equivalent method);
 - In order to simplify the passkey registration process, and to limit the amount of personal identifying information provided to us, we do not require any form of authenticator attestation by a Certificate Authority;
-- We carefully selected which algorithms @cose-algos to accept, and in which order of preference, having settled on: ECDSA w/ SHA-512 (COSE `-36`), ECDSA w/ SHA-384 (COSE `-35`), ECDSA w/ SHA-256 (COSE `-7`), RSASSA-PSS w/ SHA-512 (COSE `-39`), RSASSA-PSS w/ SHA-384 (COSE `-38`), RSASSA-PSS w/ SHA-256 (COSE `-37`), RSASSA-PKCS1-v1_5 w/ SHA-512 (COSE `-259`), RSASSA-PKCS1-v1_5 w/ SHA-384 (COSE `-258`), and finally RSASSA-PKCS1-v1_5 w/ SHA-256 (COSE `-257`). Originally we planned on listing COSE algorithm `-8`, EdDSA, as our preferential algorithm, but one of our dependencies @cose-to-jwk does not yet support it.
+- We carefully selected which algorithms @cose-algos to accept, and in which order of preference, having settled on ECDSA, then RSASSA-PSS, and then RSASSA-PKCS1-v1_5, and for each of those suites preferring algorithms using SHA-512, then SHA-384, and then SHA-256. Originally we planned on listing COSE algorithm `-8`, EdDSA, as our preferential algorithm, but one of our dependencies @fido2-lib does not yet support it.
 
-Moreover, we implemented a *Per-Group Passwordless Enforcement* feature that allows administrators (through "Admin" > "Plugins" > "Passkeys") to configure passwordless requirements for specific groups of users (such as the `administrators` group, or even all `registered-users`). Any groups selected using this feature will require its members to register a passkey if they have not already (users cannot view any pages or perform any action until they do), and members of such a group can no longer use their password to login after they have registered a passkey, therefore being forced to always login using a passkey, which significantly improves security as outlined above. #text(red)[The administration page also shows a listing of all users with registered passkeys, allowing administrators to revoke a specific user's passkeys if necessary.] We believe this feature is essential to help further the site's security, and our implementation supporting enforcement based on arbitrary groups gives administrators an enormous flexibility. Evidently, to solve this specific #smallcaps[Unauthorized Administration] problem for this project, we recommend enabling passwordless enforcement for the `administrators` group.
+Moreover, we implemented a *Per-Group Passwordless Enforcement* feature that allows administrators (through "Admin" > "Plugins" > "Passkeys") to configure passwordless requirements for specific groups of users (such as the `administrators` group, or even all `registered-users`). Any groups selected using this feature will require its members to register a passkey if they have not already (users cannot view any pages or perform any action until they do), and members of such a group can no longer use their password to login after they have registered a passkey, therefore being forced to always login using a passkey, which significantly improves security as outlined above. We believe this feature is essential to help further the site's security, and our implementation supporting enforcement based on arbitrary groups gives administrators enormous flexibility. Evidently, to solve this specific #smallcaps[Unauthorized Administration] problem for this project, we recommend enabling passwordless enforcement for the `administrators` group.
 
 // TODO
 //

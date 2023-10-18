@@ -120,6 +120,14 @@ nodebb-passkeys:
     type: Web
     title: NodeBB Community
     url: https://community.nodebb.org/
+passport:
+  type: repository
+  title:
+    value: passport
+    verbatim: true
+  url:
+    value: https://github.com/jaredhanson/passport
+    date: 2023-10-18
 w3c-webauthn:
   type: reference
   title: "Web Authentication: An API for accessing Public Key Credentials Level 2"
@@ -134,11 +142,11 @@ cose-algos:
   url:
     value: https://www.w3.org/TR/webauthn/
     date: 2023-10-17
-cose-to-jwk:
+fido2-lib:
   type: repository
   title:
-    value: cose-to-jwk
+    value: fido2-lib
     verbatim: true
   url:
-    value: https://github.com/apowers313/cose-to-jwk
+    value: https://github.com/webauthn-open-source/fido2-lib
     date: 2023-10-17
