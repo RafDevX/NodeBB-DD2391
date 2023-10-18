@@ -72,7 +72,7 @@ sensitive information, like (hashed) passwords, names, email addresses, IP
 addresses, API keys and so on. If this data were to be accessed or modified by
 an unauthorized and/or malicious user, it could be used nefariously, and result
 in spam, identity theft, social engineering attacks, and even being sold to the
-highest bidder. Depending on the size and reputation of the NodeBB forum is
+highest bidder. Depending on the size and reputation of the NodeBB forum in
 question, all of these could be a blow to its activity.
 
 As such, we would like to prevent unauthorized and remote access to the
@@ -96,13 +96,13 @@ creating a network for all the containers defined in `docker-compose.yml`.
 
 Additionally, we generate a random 256-bit password for the `nodebb` database
 user. The `mongo` Docker image supports providing custom scripts that are run
-when the database is first created (i.e. the first time the container is
+when the database is first created (i.e., the first time the container is
 started) by placing them in the `/docker-entrypoint-initdb.d/` folder inside the
-container. The script we created, `init_user.js`, adds a new user, `nodebb` to
-the `nodebb` database, with full permissions over it. Its password is then
+container. The script we created, `init_user.js`, adds a new user, `nodebb`, to
+the `nodebb` database, with full permissions over it, and only it. Its password is then
 printed to the logs, allowing us to setup the database connection on NodeBB. We
 have opted to use NodeJS' `crypto` library for the password generation instead
-of `Math.random`, due to its secure randomness.
+of `Math.random`, due to its secure pseudo-randomness.
 
 === Difficulties and Solutions
 
@@ -117,7 +117,7 @@ official image, available as `ghcr.io/nodebb/nodebb`. Nevertheless, we had to
 find a way to persist the `config.json` file, which stores the database
 credentials and other configuration, inside the container. We had two requisites
 for a solution to this problem: firstly, it would need to persist this file if
-the container is destroyed (i.e. by running `docker compose down`); secondly, we
+the container is destroyed (i.e., by running `docker compose down`); secondly, we
 should still be able to run the web installer from a clean install.
 
 The first approach we took to fix this problem only satisfied the first
@@ -134,7 +134,7 @@ NodeBB supports passing the path to the `config.json` file in the `config`
 Docker volume @docker-volumes.
 
 Additionally, for the purpose of this project, we have not persisted files
-uploaded to the NodeBB forum (e.g. attachments to posts, profile pictures, and
+uploaded to the NodeBB forum (e.g., attachments to posts, profile pictures, and
 more), as they are not needed for the demonstration of the countermeasures.
 
 Finally, as can be evidenced by the difficulties mentioned above, the lack of
@@ -722,10 +722,10 @@ remaining group members until he was satisfied with the end product.
 
 #pagebreak()
 == Yannik Tausch
-While the different attack scenarios and possible mitigations of the #link(<unauthorized-access>, [_Unauthorized Access_]) chapter
+While the different attack scenarios and possible mitigations of the #link(<unauthorized-access>, [Unauthorized Access]) chapter
 were discussed in our group, including the choice of selecting a login CAPTCHA
 as a countermeasure, Yannik contributed the categorization of possible attack
-scenarios and their taxonomy to the #link(<unauthorized-access>, [_Unauthorized Access_]) chapter
+scenarios and their taxonomy to the #link(<unauthorized-access>, [Unauthorized Access]) chapter
 of this report. Related to this chapter, he also researched the default
 countermeasures of NodeBB and evaluated their impact on the security of the
 application within the attack scenario taxonomy.
@@ -734,7 +734,7 @@ Yannik also developed the password brute-force Python script that can be used to
 demonstrate the strengths and weaknesses of the default NodeBB countermeasures
 against _Unauthorized Access_ attack scenarios. Additionally, he was responsible
 for implementing the login CAPTCHA countermeasure, including the solving of
-problems that occurred during the setup. Also, Yannik put the entire #link(<unauthorized-access>, [_Unauthorized Access_]) chapter
+problems that occurred during the setup. Also, Yannik put the entire #link(<unauthorized-access>, [Unauthorized Access]) chapter
 of this report into actual words.
 
 Additionally, Yannik helped other group members with the Docker setup of the
