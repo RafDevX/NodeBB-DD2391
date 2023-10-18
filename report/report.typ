@@ -66,10 +66,7 @@ and disrupt its normal operation.
 Data leakage can also result in significant privacy violations, potentially
 exposing the personal information of users, which may have legal and ethical
 ramifications. Users' trust in the forum and its operators can be severely
-undermined. If the forum is used for commercial purposes, a database breach can
-lead to financial losses. For example, if user payment information is stored in
-the database, it could be compromised, resulting in fraudulent transactions and
-financial theft. Lastly, a database breach can damage the reputation of both the
+undermined, and a database breach can damage the reputation of both the
 forum and its administrators. Users may lose trust in the platform, leading to a
 decrease in user engagement, decreased traffic, and potentially a loss of
 revenue.
