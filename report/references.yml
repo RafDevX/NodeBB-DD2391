@@ -85,6 +85,46 @@ nodebb-repo:
   url:
     value: https://github.com/NodeBB/NodeBB
     date: 2023-10-18
+seclists-common-credentials:
+  type: misc
+  title:
+    value: SecLists / Passwords / Common-Credentials
+    verbatim: true
+  url:
+    value: https://github.com/danielmiessler/SecLists/tree/395c945627196b6172e6e83a014c964f805e8d48/Passwords/Common-Credentials
+    date: 2023-10-16
+nodebb-src-lockout:
+  type: misc
+  title:
+    value: NodeBB / src / user / auth / logAttempt
+    verbatim: true
+  url:
+    value: https://github.com/NodeBB/NodeBB/blob/0acb2fcfe472cb745618e806e41af3e551580fad/src/user/auth.js#L16-L40
+    date: 2023-10-17
+nodebb-plugin-spam-be-gone:
+  type: repository
+  title:
+    value: nodebb-plugin-spam-be-gone
+    verbatim: true
+  url:
+    value: https://github.com/akhoury/nodebb-plugin-spam-be-gone
+    date: 2023-10-17
+google-recaptcha:
+  type: web
+  title:
+    value: Google reCAPTCHA
+    verbatim: true
+  url:
+    value: https://www.google.com/recaptcha/about/
+    date: 2023-10-17
+recaptcha-docs-v3:
+  type: web
+  title:
+    value: reCAPTCHA v3
+    verbatim: true
+  url:
+    value: https://developers.google.com/recaptcha/docs/v3
+    date: 2023-10-17
 nodebb-plugin-2factor:
   type: repository
   title:

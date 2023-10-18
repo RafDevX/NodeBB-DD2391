@@ -151,7 +151,7 @@ measures, depending on the sensitivity of the information in the forum.
 == Unauthorized Access <unauthorized-access>
 
 === Possible Attack Scenarios
-An attacker could target a *specific user* and try to brute-force their password in an online attack. The attacker could use a list of *common passwords* such as from the SecLists project #footnote[https://github.com/danielmiessler/SecLists/tree/master/Passwords/Common-Credentials] or may have obtained a *specific list of passwords* that the target user uses on different websites, which could be likely candidates for the user's credentials for the NodeBB instance, or other likely passwords for that specific user.
+An attacker could target a *specific user* and try to brute-force their password in an online attack. The attacker could use a list of *common passwords* such as from the SecLists project @seclists-common-credentials or may have obtained a *specific list of passwords* that the target user uses on different websites, which could be likely candidates for the user's credentials for the NodeBB instance, or other likely passwords for that specific user.
 
 Additionally, the attacker could facilitate a botnet to *distribute* their attack over many IP addresses instead of originating all requests from a single IP.
 
@@ -197,9 +197,9 @@ Unfortunately, we could not find an explanation of this setting in the NodeBB do
   caption: "NodeBB Settings Related to Account Protection"
 ) <account-settings>
 
-The behaviour of this account locking mechanism can be verified in the NodeBB source code #footnote[https://github.com/NodeBB/NodeBB/blob/0acb2fcfe472cb745618e806e41af3e551580fad/src/user/auth.js#L16C5-L40]. A locked account can be recovered by the user themselves by receiving a password reset link via email.
+The behavior of this account locking mechanism can be verified in the NodeBB source code @nodebb-src-lockout. A locked account can be recovered by the user themselves by receiving a password reset link via email.
 
-For validation and demonstration purposes, we developed a Python script #footnote[available at `unauthorized_access/bruteforce.py` in the GitHub submission] that executes a TCNX attack against a specific target user. We could validate that user accounts are indeed locked according to the setting. The script can easily be modified for untargeted attacks, and a modification for individual password lists per user is also possible.
+For validation and demonstration purposes, we developed a Python script #footnote[available at `unauthorized_access/bruteforce.py` in the project repository submission] that executes a TCNX attack against a specific target user. We could validate that user accounts are indeed locked according to the setting. The script can easily be modified for untargeted attacks, and a modification for individual password lists per user is also possible.
 
 We could not identify any additional countermeasures by NodeBB against the threat models outlined in this section of the report, for example automatic IP blocking (manual IP blocking is possible though). Therefore, the default protections do not differentiate between distributed and non-distributed attacks.
 
@@ -248,7 +248,7 @@ The default situation is summarized in @default-mitigations.
 To improve the security of the application with regard to the threat models outlined in this chapter, different additional countermeasures were considered.
 We chose to implement a CAPTCHA challenge that has to be solved for each login attempt to make automated login attempts less feasible.
 
-Such a CAPTCHA can be accomplished by installing the NodeBB plugin `nodebb-plugin-spam-be-gone` #footnote[https://github.com/akhoury/nodebb-plugin-spam-be-gone]. In addition to executing CAPTCHAs when a new post is created, it also supports Google reCAPTCHA #footnote[https://www.google.com/recaptcha] on the NodeBB login page.
+Such a CAPTCHA can be accomplished by installing the NodeBB plugin `nodebb-plugin-spam-be-gone` @nodebb-plugin-spam-be-gone. In addition to executing CAPTCHAs when a new post is created, it also supports Google reCAPTCHA @google-recaptcha on the NodeBB login page.
 
 The installation is described in the appropriate README file of our GitHub repository. When setting up the plugin, we experienced issues such as error messages on the login page UI, either indicating a misconfiguration or a failed CAPTCHA, although the CAPTCHA was solved correctly. These issues could be resolved by making sure that a reCAPTCHA "v2" with checkbox "I am not a robot" API key is being used. Other options are not supported by the NodeBB plugin.
 
@@ -302,7 +302,7 @@ Using Google reCAPTCHA has privacy implications, since every time a user visits 
 
 Besides that, CAPTCHAs usually negatively impact the UX of an application.
 However, when implemented correctly, they generally present a good tradeoff between usability and security, as the security benefits can be immense (as outlined in this chapter).
-Modern CAPTCHA technologies such as Google reCAPTCHA v3 #footnote[https://developers.google.com/recaptcha/docs/v3] (which is unfortunately not supported by `nodebb-plugin-spam-be-gone`) allow verifying the legitimacy of a request without user intervention by collecting data in the background, removing the UX impact.
+Modern CAPTCHA technologies such as Google reCAPTCHA v3 @recaptcha-docs-v3 (which is unfortunately not supported by `nodebb-plugin-spam-be-gone`) allow verifying the legitimacy of a request without user intervention by collecting data in the background, removing the UX impact.
 Evaluating these kinds of CAPTCHAs for our application was out of scope for this report.
 
 #pagebreak()
