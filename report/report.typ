@@ -67,7 +67,7 @@
 Diogo already had prior experience with Docker and JavaScript, which was a
 valuable skill in this project. Along with #link(<rafael>)[Rafael], he worked on
 the #link(<unauthorized-admin>)[Unauthorized Administration]
-task, deciding on what was the best course of action for solving the problem at
+task, deliberating on what was the best course of action for solving the problem at
 hands. It was first decided that we would implement two-factor authentication,
 but upon finding out that the plugin already existed, and that a solution only
 included clicking on a few buttons in the web interface, Diogo decided to
