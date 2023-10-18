@@ -1,6 +1,7 @@
 # NodeBB-DD2391
 
 ## Report
+
 > **Our report in PDF format is available here: [Final Release](https://github.com/RafDevX/NodeBB-DD2391/releases/tag/submission)**
 
 ## Overview
@@ -17,7 +18,7 @@ In this project, we attempted to solve or mitigate three problems related to the
 
 In order to run our solution locally, please follow the steps below. Note that for `docker` commands, your user will need to be in the `docker` group, otherwise you will need to run them as root.
 
-1. Clone the repository: `git clone git@github.com:RafDevX/NodeBB-DD2391.git`
+1. Clone the repository and `cd` into it: `git clone git@github.com:RafDevX/NodeBB-DD2391.git` + `cd NodeBB-DD2391`
 2. Start the containers: `docker compose up -d --build`
 3. Show and watch logs: `docker compose logs -f`
 4. The first time NodeBB runs, it will spin up a web installer that can be accessed at `http://localhost:4567`. You should fill out the fields shown as specified below and then submit by pressing "Install NodeBB" at the bottom of the page:
@@ -40,7 +41,9 @@ In order to run our solution locally, please follow the steps below. Note that f
 9. As you are an administrator, you will now be required to register a passkey (you could have also previously done so of your own volition in "Settings" > "Passkeys")
 10. Activate login CAPTCHAs by navigating to "Admin" > "Extend" > "Plugins" > "nodebb-plugin-spam-be-gone" > "Activate" > "Confirm" > "Rebuild & Restart" > "Confirm"
 11. Refresh the page after NodeBB says the rebuild has been completed
-12. Go to "Plugins" > "Spam Be Gone" > "Google reCAPTCHA", check both checkboxes ("Enable Re-Captcha" and "Enable Re-Captcha on login page as well"), fill out with your API keys (that must be v2 keys for "I am not a Robot" checkboxes, created in [Google's reCAPTCHA Admin Portal](https://www.google.com/recaptcha/admin)), and press "Save changes"
-13. After you have completed these steps, the system is fully configured and should be securely addressing/mitigating the problems described above. It is now production-ready!
+12. Go to "Plugins" > "Spam Be Gone" > "StopForumSpam", uncheck the "Enable StopForumSpam" checkbox, and press "Save changes" (due to a bug in the plugin, it is enabled by default, but will not allow saving any other settings as no API key is provided)
+13. Switch to the "Google reCAPTCHA" tab, check both checkboxes ("Enable Re-Captcha" and "Enable Re-Captcha on login page as well"), fill out with your API keys (that must be v2 keys for "I am not a Robot" checkboxes, created in [Google's reCAPTCHA Admin Portal](https://www.google.com/recaptcha/admin)), and press "Save changes"
+14. As instructed by the UI, press "Rebuild & Restart" > "Confirm" and wait for NodeBB to report completion
+15. After you have completed these steps, the system is fully configured and should be securely addressing/mitigating the problems described above. It is now production-ready!
 
 At any point, you can stop and remove the containers with `docker compose down` (or `docker compose down -v` to delete volumes as well, permanently destroying all stored data).
