@@ -151,75 +151,161 @@ measures, depending on the sensitivity of the information in the forum.
 == Unauthorized Access <unauthorized-access>
 
 === Possible Attack Scenarios
-An attacker could target a *specific user* and try to brute-force their password in an online attack. The attacker could use a list of *common passwords* such as from the SecLists project @seclists-common-credentials or may have obtained a *specific list of passwords* that the target user uses on different websites, which could be likely candidates for the user's credentials for the NodeBB instance, or other likely passwords for that specific user.
+An attacker could target a *specific user* and try to brute-force their password
+in an online attack. The attacker could use a list of *common passwords* such as
+from the SecLists project @seclists-common-credentials or may have obtained a
+*specific list of passwords* that the target user uses on different websites,
+which could be likely candidates for the user's credentials for the NodeBB
+instance, or other likely passwords for that specific user.
 
-Additionally, the attacker could facilitate a botnet to *distribute* their attack over many IP addresses instead of originating all requests from a single IP.
+Additionally, the attacker could facilitate a botnet to *distribute* their
+attack over many IP addresses instead of originating all requests from a single
+IP.
 
-The attacker's goal could be either to compromise *confidentiality* and *integrity* by guessing the user's password and taking over their account, or to compromise *availability* by triggering an account lockout mechanism designed to prevent password guessing.
-Although compromising availability is strictly speaking not part of somebody gaining "unauthorized access", these two aspects have to be considered together when designing countermeasures, as their effectiveness depends on each other.
+The attacker's goal could be either to compromise *confidentiality* and
+*integrity* by guessing the user's password and taking over their account, or to
+compromise *availability* by triggering an account lockout mechanism designed to
+prevent password guessing. Although compromising availability is strictly
+speaking not part of somebody gaining "unauthorized access", these two aspects
+have to be considered together when designing countermeasures, as their
+effectiveness depends on each other.
 
-Alternatively to targeting a specific user, the attacker could also run an *untargeted attack* by brute-forcing passwords of multiple users.
+Alternatively to targeting a specific user, the attacker could also run an
+*untargeted attack* by brute-forcing passwords of multiple users.
 
 All of these different attack variants can be arbitrarily combined.
 
 === Taxonomy
-In order to maintain an overview over the different attack scenarios, we introduce a 4-letter notation to distinguish between the different kinds of attacks, which is outlined in @notation.
+In order to maintain an overview over the different attack scenarios, we
+introduce a 4-letter notation to distinguish between the different kinds of
+attacks, which is outlined in @notation.
 
-#figure(
-  table(
-    columns: (auto, auto, auto, auto),
-    inset: 10pt,
-    align: (left, left, left, left),
-    [*Target*], [*Password List*], [*Distributed?*], [*Attacker Goal*],
-    [*`T`*: targeted \ *`U`*: untargeted],
-    [*`C`*: common list \ *`S`*: specific for (each) user],
-    [*`D`*: distributed \ *`N`*: not distributed],
-    [*`O`*: account takeover \ *`L`*: account lockout]
-  ),
-  caption: [Notation for _Unauthorized Access_ Attack Scenarios]
-) <notation>
+#figure(table(
+  columns: (auto, auto, auto, auto),
+  inset: 10pt,
+  align: (left, left, left, left),
+  [*Target*],
+  [*Password List*],
+  [*Distributed?*],
+  [*Attacker Goal*],
+  [*`T`*: targeted \ *`U`*: untargeted],
+  [*`C`*: common list \ *`S`*: specific for (each) user],
+  [*`D`*: distributed \ *`N`*: not distributed],
+  [*`O`*: account takeover \ *`L`*: account lockout],
+), caption: [Notation for _Unauthorized Access_ Attack Scenarios]) <notation>
 
-For example, TSDO denotes the attack scenario in which one specific user account is targeted, using a specific password list tailored for this user, and a distributed botnet, to achieve an account takeover.
+For example, TSDO denotes the attack scenario in which one specific user account
+is targeted, using a specific password list tailored for this user, and a
+distributed botnet, to achieve an account takeover.
 
-To describe a set of multiple attack scenarios, any letter can be replaced with `X` to denote "any". For example, UXXL denotes all attack scenarios aiming to lock out as many users as possible from their accounts.
+To describe a set of multiple attack scenarios, any letter can be replaced with
+`X` to denote "any". For example, UXXL denotes all attack scenarios aiming to
+lock out as many users as possible from their accounts.
 
-We should point out that there is no difference between XCXL and XSXL attacks because any set of passwords can be used to trigger an account lockout if such a system is implemented. Any other combination of attack properties is imaginable and should be subject to consideration.
+We should point out that there is no difference between XCXL and XSXL attacks
+because any set of passwords can be used to trigger an account lockout if such a
+system is implemented. Any other combination of attack properties is imaginable
+and should be subject to consideration.
 
 === NodeBB Default Countermeasures
-Before discussing possible additional countermeasures, we first examined the countermeasures that NodeBB is configured with by default.
+Before discussing possible additional countermeasures, we first examined the
+countermeasures that NodeBB is configured with by default.
 
-These countermeasures include a setting of allowing a maximum of 5 login attempts per hour, per user.
-If this limit is exceeded, the user account is locked for 60 minutes. Successful logins reset the number of login attempts, and so does the 60-minute lockout.
-Unfortunately, we could not find an explanation of this setting in the NodeBB documentation but it appears in the NodeBB admin panel under `Settings`~#sym.arrow~`Users`~#sym.arrow~`Account`~`Protection`, as can be seen in @account-settings.
+These countermeasures include a setting of allowing a maximum of 5 login
+attempts per hour, per user. If this limit is exceeded, the user account is
+locked for 60 minutes. Successful logins reset the number of login attempts, and
+so does the 60-minute lockout. Unfortunately, we could not find an explanation
+of this setting in the NodeBB documentation but it appears in the NodeBB admin
+panel under `Settings`~#sym.arrow~`Users`~#sym.arrow~`Account`~`Protection`, as
+can be seen in @account-settings.
 
 #figure(
   image("account_settings.svg", height: 20%),
-  caption: "NodeBB Settings Related to Account Protection"
+  caption: "NodeBB Settings Related to Account Protection",
 ) <account-settings>
 
-The behavior of this account locking mechanism can be verified in the NodeBB source code @nodebb-src-lockout. A locked account can be recovered by the user themselves by receiving a password reset link via email.
+The behavior of this account-locking mechanism can be verified in the NodeBB
+source code @nodebb-src-lockout. A locked account can be recovered by the user
+themselves by receiving a password reset link via email.
 
-For validation and demonstration purposes, we developed a Python script #footnote[available at `unauthorized_access/bruteforce.py` in the project repository submission] that executes a TCNX attack against a specific target user. We could validate that user accounts are indeed locked according to the setting. The script can easily be modified for untargeted attacks, and a modification for individual password lists per user is also possible.
+For validation and demonstration purposes, we developed a Python script #footnote[available at `unauthorized_access/bruteforce.py` in the project repository
+  submission] that executes a TCNX attack against a specific target user. We could
+validate that user accounts are indeed locked according to the setting. The
+script can easily be modified for untargeted attacks, and a modification for
+individual password lists per user is also possible.
 
-We could not identify any additional countermeasures by NodeBB against the threat models outlined in this section of the report, for example automatic IP blocking (manual IP blocking is possible though). Therefore, the default protections do not differentiate between distributed and non-distributed attacks.
+We could not identify any additional countermeasures by NodeBB against the
+threat models outlined in this section of the report, for example automatic IP
+blocking (manual IP blocking is possible though). Therefore, the default
+protections do not differentiate between distributed and non-distributed
+attacks.
 
-Since the default account locking settings lead to a maximum of 120 login attempts per day (43.800 per year), they are mostly sufficient when used in combination with a strong password policy (which is configurable with NodeBB)#footnote[For example, there exist $62^16 approx 4 dot 10^28$ different alphanumeric passwords of length 16.]. Therefore, NodeBB by default effectively protects against TCXO attacks. For TSXO attacks, it should be noted that a targeted attack with a manageable list of possible password candidates could be run in the background over a long period of time without the user noticing.
+Since the default account locking settings lead to a maximum of 120 login
+attempts per day (43.800 per year), they are mostly sufficient when used in
+combination with a strong password policy (which is configurable with NodeBB)#footnote[For example, there exist $62^16 approx 4 dot 10^28$ different alphanumeric
+  passwords of length 16.]. Therefore, NodeBB by default effectively protects
+against TCXO attacks. For TSXO attacks, it should be noted that a targeted
+attack with a manageable list of possible password candidates could be run in
+the background over a long period of time without the user noticing.
 
-NodeBB's protection against UXXO attacks are not sufficient because a single attacker can guess 43.800 passwords per year, _per user_. Assuming a large online forum with 100.000 users, this leads to a total amount of 4.4 billion guesses per year, which is not an acceptable risk, even if a strong password policy is employed. It is possible even among long passwords to choose a weak password that is not detectable automatically. Some users will choose these passwords, allowing their account to be taken over with this attack.
+NodeBB's protection against UXXO attacks are not sufficient because a single
+attacker can guess 43.800 passwords per year, _per user_. Assuming a large
+online forum with 100.000 users, this leads to a total amount of 4.4 billion
+guesses per year, which is not an acceptable risk, even if a strong password
+policy is employed. It is possible even among long passwords to choose a weak
+password that is not detectable automatically. Some users will choose these
+passwords, allowing their account to be taken over with this attack.
 
-Finally, NodeBB's countermeasures against XXXL account lockout attacks are effective in the sense that a user can always reset a lockout period by receiving a password reset link via email.
-However, this comes with two limitations: First, being required to reset your password via email is in some sense a degradation in availability; and second, there is nothing preventing a malicious attacker from spamming a large number of login requests, locking the account again faster than the time it takes the user to log in after unlocking it.
-Nevertheless, the default solution is better than nothing, and the request spamming could easily be mitigated by, for example, a web proxy in front of the application.
+Finally, NodeBB's countermeasures against XXXL account lockout attacks are
+effective in the sense that a user can always reset a lockout period by
+receiving a password reset link via email. However, this comes with two
+limitations: First, being required to reset your password via email is in some
+sense a degradation in availability; and second, there is nothing preventing a
+malicious attacker from spamming a large number of login requests, locking the
+account again faster than the time it takes the user to log in after unlocking
+it. Nevertheless, the default solution is better than nothing, and the request
+spamming could easily be mitigated by, for example, a web proxy in front of the
+application.
 
 The default situation is summarized in @default-mitigations.
 
 #let tableColors = (
-  none, none, none, none, none, none,
-  none, green, red, red, green, none,
-  none, red, red, red, red, none,
-  none, yellow, yellow, yellow, yellow, none,
-  none, none, none, none, none, none,
-  none, none, none, none, none, none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  green,
+  red,
+  red,
+  green,
+  none,
+  none,
+  red,
+  red,
+  red,
+  red,
+  none,
+  none,
+  yellow,
+  yellow,
+  yellow,
+  yellow,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
 )
 #figure(
   grid(
@@ -230,43 +316,109 @@ The default situation is summarized in @default-mitigations.
       columns: (20pt, 50pt, 50pt, 50pt, 50pt, 20pt),
       rows: (20pt, 50pt, 50pt, 50pt, 50pt, 20pt),
       align: horizon + center,
-      fill: (col, row) => tableColors.at(col + 6*row),
-      [], [*T*], colspanx(2)[*untargeted*], [*T*], [],
-      [*C*], [TCDO], [UCDO], [UCNO], [TCNO], rowspanx(2, rotate(-90deg, text(hyphenate: false)[*takeover*])),
-      rowspanx(2, rotate(-90deg, text(hyphenate: false)[*specific*])), [TSDO], [USDO], [USNO], [TSNO],
-      rowspanx(2)[TXDL], rowspanx(2)[UXDL], rowspanx(2)[UXNL], rowspanx(2)[TXNL], rowspanx(2, rotate(-90deg, text(hyphenate: false)[*lockout*])),
+      fill: (col, row) => tableColors.at(col + 6 * row),
+      [],
+      [*T*],
+      colspanx(2)[*untargeted*],
+      [*T*],
+      [],
       [*C*],
-      [], colspanx(2)[*distributed*], colspanx(2)[*not distributed*],
+      [TCDO],
+      [UCDO],
+      [UCNO],
+      [TCNO],
+      rowspanx(2, rotate(-90deg, text(hyphenate: false)[*takeover*])),
+      rowspanx(2, rotate(-90deg, text(hyphenate: false)[*specific*])),
+      [TSDO],
+      [USDO],
+      [USNO],
+      [TSNO],
+      rowspanx(2)[TXDL],
+      rowspanx(2)[UXDL],
+      rowspanx(2)[UXNL],
+      rowspanx(2)[TXNL],
+      rowspanx(2, rotate(-90deg, text(hyphenate: false)[*lockout*])),
+      [*C*],
+      [],
+      colspanx(2)[*distributed*],
+      colspanx(2)[*not distributed*],
     ),
-    [Legend: #text(green)[■] good protection, #text(yellow)[■] some protection, #text(red)[■] no protection],
-    v(5pt)
+    [Legend: #text(green)[■] good protection, #text(yellow)[■] some protection, #text(red)[■] no
+      protection],
+    v(5pt),
   ),
-  caption: [NodeBB Default _Unauthorized Access_ Mitigations]
+  caption: [NodeBB Default _Unauthorized Access_ Mitigations],
 ) <default-mitigations>
 
 === Countermeasure: Login CAPTCHA
-To improve the security of the application with regard to the threat models outlined in this chapter, different additional countermeasures were considered.
-We chose to implement a CAPTCHA challenge that has to be solved for each login attempt to make automated login attempts less feasible.
+To improve the security of the application with regard to the threat models
+outlined in this chapter, different additional countermeasures were considered.
+We chose to implement a CAPTCHA challenge that has to be solved for each login
+attempt to make automated login attempts less feasible.
 
-Such a CAPTCHA can be accomplished by installing the NodeBB plugin `nodebb-plugin-spam-be-gone` @nodebb-plugin-spam-be-gone. In addition to executing CAPTCHAs when a new post is created, it also supports Google reCAPTCHA @google-recaptcha on the NodeBB login page.
+Such a CAPTCHA can be accomplished by installing the NodeBB plugin
+`nodebb-plugin-spam-be-gone` @nodebb-plugin-spam-be-gone. In addition to
+executing CAPTCHAs when a new post is created, it also supports Google reCAPTCHA
+@google-recaptcha on the NodeBB login page.
 
-The installation is described in the appropriate README file of our GitHub repository. When setting up the plugin, we experienced issues such as error messages on the login page UI, either indicating a misconfiguration or a failed CAPTCHA, although the CAPTCHA was solved correctly. These issues could be resolved by making sure that a reCAPTCHA "v2" with checkbox "I am not a robot" API key is being used. Other options are not supported by the NodeBB plugin.
+The installation is described in the appropriate README file of our GitHub
+repository. When setting up the plugin, we experienced issues such as error
+messages on the login page UI, either indicating a misconfiguration or a failed
+CAPTCHA, although the CAPTCHA was solved correctly. These issues could be
+resolved by making sure that a reCAPTCHA "v2" with checkbox "I am not a robot"
+API key is being used. Other options are not supported by the NodeBB plugin.
 
-With the CAPTCHA enabled while assuming that it indeed prevents almost all automated login attempts, the security considerations of our NodeBB instance change. It is no longer feasible to perform untargeted (UXXX) attacks because they require too many login attempts, which would have to be executed manually.
+With the CAPTCHA enabled while assuming that it indeed prevents almost all
+automated login attempts, the security considerations of our NodeBB instance
+change. It is no longer feasible to perform untargeted (UXXX) attacks because
+they require too many login attempts, which would have to be executed manually.
 
-Additionally, distributed (XXDX) attacks, as long as we limit our scope to botnets, are no longer feasible for the same reason.
+Additionally, distributed (XXDX) attacks, as long as we limit our scope to
+botnets, are no longer feasible for the same reason.
 
-Nevertheless, TSNO attacks are still realistic, and it is still possible to force a targeted user into resetting their password with a non-distributed attack - meaning that TXNL attacks are not fully defended against.
+Nevertheless, TSNO attacks are still realistic, and it is still possible to
+force a targeted user into resetting their password with a non-distributed
+attack - meaning that TXNL attacks are not fully defended against.
 
 A full final overview is given in @final-mitigations.
 
 #let tableColors = (
-  none, none, none, none, none, none,
-  none, green, green, green, green, none,
-  none, green, green, green, red, none,
-  none, green, green, green, yellow, none,
-  none, none, none, none, none, none,
-  none, none, none, none, none, none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  green,
+  green,
+  green,
+  green,
+  none,
+  none,
+  green,
+  green,
+  green,
+  red,
+  none,
+  none,
+  green,
+  green,
+  green,
+  yellow,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
+  none,
 )
 #figure(
   grid(
@@ -277,33 +429,63 @@ A full final overview is given in @final-mitigations.
       columns: (20pt, 50pt, 50pt, 50pt, 50pt, 20pt),
       rows: (20pt, 50pt, 50pt, 50pt, 50pt, 20pt),
       align: horizon + center,
-      fill: (col, row) => tableColors.at(col + 6*row),
-      [], [*T*], colspanx(2)[*untargeted*], [*T*], [],
-      [*C*], [TCDO], [UCDO], [UCNO], [TCNO], rowspanx(2, rotate(-90deg, text(hyphenate: false)[*takeover*])),
-      rowspanx(2, rotate(-90deg, text(hyphenate: false)[*specific*])), [TSDO], [USDO], [USNO], [TSNO],
-      rowspanx(2)[TXDL], rowspanx(2)[UXDL], rowspanx(2)[UXNL], rowspanx(2)[TXNL], rowspanx(2, rotate(-90deg, text(hyphenate: false)[*lockout*])),
+      fill: (col, row) => tableColors.at(col + 6 * row),
+      [],
+      [*T*],
+      colspanx(2)[*untargeted*],
+      [*T*],
+      [],
       [*C*],
-      [], colspanx(2)[*distributed*], colspanx(2)[*not distributed*],
+      [TCDO],
+      [UCDO],
+      [UCNO],
+      [TCNO],
+      rowspanx(2, rotate(-90deg, text(hyphenate: false)[*takeover*])),
+      rowspanx(2, rotate(-90deg, text(hyphenate: false)[*specific*])),
+      [TSDO],
+      [USDO],
+      [USNO],
+      [TSNO],
+      rowspanx(2)[TXDL],
+      rowspanx(2)[UXDL],
+      rowspanx(2)[UXNL],
+      rowspanx(2)[TXNL],
+      rowspanx(2, rotate(-90deg, text(hyphenate: false)[*lockout*])),
+      [*C*],
+      [],
+      colspanx(2)[*distributed*],
+      colspanx(2)[*not distributed*],
     ),
-    [Legend: #text(green)[■] good protection, #text(yellow)[■] some protection, #text(red)[■] no protection],
-    v(5pt)
+    [Legend: #text(green)[■] good protection, #text(yellow)[■] some protection, #text(red)[■] no
+      protection],
+    v(5pt),
   ),
-  caption: [NodeBB _Unauthorized Access_ Mitigations with CAPTCHA enabled]
+  caption: [NodeBB _Unauthorized Access_ Mitigations with CAPTCHA enabled],
 ) <final-mitigations>
 
 === Additional Considerations
-As outlined above, a secure password policy should be in place for the mitigations to be effective.
+As outlined above, a secure password policy should be in place for the
+mitigations to be effective.
 
-Different approaches such as IP rate limiting and IP address blocking would be appropriate to further improve the security of the application.
+Different approaches such as IP rate limiting and IP address blocking would be
+appropriate to further improve the security of the application.
 
-We also did not evaluate the security of password reset links sent out via email by NodeBB.
+We also did not evaluate the security of password reset links sent out via email
+by NodeBB.
 
-Using Google reCAPTCHA has privacy implications, since every time a user visits the login site, a request is sent to Google. Evaluating these implications was out of scope for this report.
+Using Google reCAPTCHA has privacy implications, since every time a user visits
+the login site, a request is sent to Google. Evaluating these implications was
+out of scope for this report.
 
 Besides that, CAPTCHAs usually negatively impact the UX of an application.
-However, when implemented correctly, they generally present a good tradeoff between usability and security, as the security benefits can be immense (as outlined in this chapter).
-Modern CAPTCHA technologies such as Google reCAPTCHA v3 @recaptcha-docs-v3 (which is unfortunately not supported by `nodebb-plugin-spam-be-gone`) allow verifying the legitimacy of a request without user intervention by collecting data in the background, removing the UX impact.
-Evaluating these kinds of CAPTCHAs for our application was out of scope for this report.
+However, when implemented correctly, they generally present a good tradeoff
+between usability and security, as the security benefits can be immense (as
+outlined in this chapter). Modern CAPTCHA technologies such as Google reCAPTCHA
+v3 @recaptcha-docs-v3 (which is unfortunately not supported by
+`nodebb-plugin-spam-be-gone`) allow verifying the legitimacy of a request
+without user intervention by collecting data in the background, removing the UX
+impact. Evaluating these kinds of CAPTCHAs for our application was out of scope
+for this report.
 
 #pagebreak()
 == Unauthorized Administration <unauthorized-admin>
@@ -451,7 +633,7 @@ the advantages and disadvantages of passkeys.
 
 Additionally, Diogo also worked on the #link(<db-leakage>)[Database Leakage] task,
 by fixing the problem where clean installs stopped being possible after
-persisting the config file. He also contributed to the respective section on the
+persisting the config file. He also contributed to the respective section of the
 report.
 
 Finally, Diogo setup the document for the report, using Typst, along with the
@@ -538,14 +720,24 @@ remaining group members until he was satisfied with the end product.
 
 #pagebreak()
 == Yannik Tausch
-While the different attack scenarios and possible mitigations of the #link(<unauthorized-access>, [_Unauthorized Access_]) chapter were discussed in our group, including the choice of selecting a login CAPTCHA as a countermeasure, Yannik contributed the categorization of possible attack scenarios and their taxonomy to the #link(<unauthorized-access>, [_Unauthorized Access_]) chapter of this report.
-Related to this chapter, he also researched the default countermeasures of NodeBB and evaluated their impact on the security of the application within the attack scenario taxonomy.
+While the different attack scenarios and possible mitigations of the #link(<unauthorized-access>, [_Unauthorized Access_]) chapter
+were discussed in our group, including the choice of selecting a login CAPTCHA
+as a countermeasure, Yannik contributed the categorization of possible attack
+scenarios and their taxonomy to the #link(<unauthorized-access>, [_Unauthorized Access_]) chapter
+of this report. Related to this chapter, he also researched the default
+countermeasures of NodeBB and evaluated their impact on the security of the
+application within the attack scenario taxonomy.
 
-Yannik also developed the password brute-force Python script that can be used to demonstrate the strengths and weaknesses of the default NodeBB countermeasures against _Unauthorized Access_ attack scenarios.
-Additionally, he was responsible for implementing the login CAPTCHA countermeasure, including the solving of problems that occurred during the setup.
-Also, Yannik put the entire #link(<unauthorized-access>, [_Unauthorized Access_]) chapter of this report into actual words.
+Yannik also developed the password brute-force Python script that can be used to
+demonstrate the strengths and weaknesses of the default NodeBB countermeasures
+against _Unauthorized Access_ attack scenarios. Additionally, he was responsible
+for implementing the login CAPTCHA countermeasure, including the solving of
+problems that occurred during the setup. Also, Yannik put the entire #link(<unauthorized-access>, [_Unauthorized Access_]) chapter
+of this report into actual words.
 
-Additionally, Yannik helped other group members with the Docker setup of the application and contributed his knowledge about the initialization of the MongoDB Docker container.
+Additionally, Yannik helped other group members with the Docker setup of the
+application and contributed his knowledge about the initialization of the
+MongoDB Docker container.
 
 Finally, Yannik reviewed every chapter of this report he did not write himself.
 
