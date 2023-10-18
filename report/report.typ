@@ -193,7 +193,7 @@ If this limit is exceeded, the user account is locked for 60 minutes. Successful
 Unfortunately, we could not find an explanation of this setting in the NodeBB documentation but it appears in the NodeBB admin panel under `Settings`~#sym.arrow~`Users`~#sym.arrow~`Account`~`Protection`, as can be seen in @accountSettings.
 
 #figure(
-  image("account_settings.png", height: 20%),
+  image("account_settings.svg", height: 20%),
   caption: "NodeBB Settings Related to Account Protection"
 ) <accountSettings>
 
