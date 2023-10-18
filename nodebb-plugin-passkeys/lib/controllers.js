@@ -23,15 +23,11 @@ async function getGroups(set) {
     }));
 }
 
-controllers.renderAdminPage = async function (req, res, next) {
-    const [groups, users] = await Promise.all([
-        getGroups('groups:createtime'),
-        parent.getUsers(),
-    ]);
-
-    const data = { groups, users, title: '[[passkeys:title]]' };
-
-    res.render('admin/plugins/passkeys', data);
+controllers.renderAdminPage = async function (req, res) {
+    res.render('admin/plugins/passkeys', {
+        groups: await getGroups('groups:createtime'),
+        title: '[[passkeys:title]]',
+    });
 };
 
 controllers.renderSettingsPage = async (req, res) => {

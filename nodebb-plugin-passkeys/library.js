@@ -400,12 +400,4 @@ plugin.getPwdlessEnforcedGroups = async () => {
 plugin.forcePwdless = async (uid) =>
     await groups.isMemberOfAny(uid, await plugin.getPwdlessEnforcedGroups());
 
-plugin.getUsers = async function () {
-    return db
-        .getObjectKeys('passkeys:pubkeys') // FIXME: does not work
-        .then((uids) =>
-            user.getUsersFields(uids, ['username', 'userslug', 'picture'])
-        );
-};
-
 module.exports = plugin;
