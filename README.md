@@ -38,4 +38,5 @@ In order to run our solution locally, please follow the steps below. Note that f
 12. Refresh the page after NodeBB says the rebuild has been completed
 13. Go to "Plugins" > "Spam Be Gone" > "Google reCAPTCHA", check both checkboxes ("Enable Re-Captcha" and "Enable Re-Captcha on login page as well"), fill out with your API keys (that must be v2 keys for "I am not a Robot" checkboxes, created in [Google's reCAPTCHA Admin Portal](https://www.google.com/recaptcha/admin)), and press "Save changes"
 14. After you have completed these steps, the system is fully configured and should be securely addressing/mitigating the problems described above. It is now production-ready!
-15. Stop and remove the containers with `docker compose down` (or `docker compose down -v` to delete volumes as well, permanently destroying all stored data)
+
+At any point, you can stop and remove the containers with `docker compose down` (or `docker compose down -v` to delete volumes as well, permanently destroying all stored data).
