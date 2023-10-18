@@ -57,32 +57,32 @@ which means that if a firewall is not configured, it would be exposed to the
 internet, leaving it vulnerable.
 
 NodeBB uses MongoDB (among other options) to persistently store its data, which
-includes public information, such as posts and replies, but also
-personal or sensitive information, like (hashed) passwords, names, email
-addresses, IP addresses, API keys and so on. If this data were to be accessed or
-modified by an unauthorized and/or malicious user, it could be used nefariously,
-and result in spam, identity theft, social engineering attacks, and even being
-sold to the highest bidder. Depending on the size and reputation of the NodeBB
-forum is question, all of these could be a blow to its activity.
+includes public information, such as posts and replies, but also personal or
+sensitive information, like (hashed) passwords, names, email addresses, IP
+addresses, API keys and so on. If this data were to be accessed or modified by
+an unauthorized and/or malicious user, it could be used nefariously, and result
+in spam, identity theft, social engineering attacks, and even being sold to the
+highest bidder. Depending on the size and reputation of the NodeBB forum is
+question, all of these could be a blow to its activity.
 
-As such, we would like to prevent unauthorized and remote access to the database,
-securing the data that it stores.
+As such, we would like to prevent unauthorized and remote access to the
+database, securing the data that it stores.
 
 === Chosen Countermeasures and Implementations
 
 With this threat model in mind, we have devised two strategies to improve the
 security of the database installation. As opposed to a bare metal installation,
-we have opted to deploy containerized applications using **Docker** @docker.
+we have opted to deploy containerized applications using *Docker* @docker.
 
-Firstly, we used **Docker Compose** @docker-compose to deploy our NodeBB and MongoDB
-instances. With this setup, both applications are run in an isolated network
-that is not exposed to the internet @docker-networks. It is then possible to
-expose specific ports of specific containers. We have exposed port `4567` of the
-NodeBB container to allow access to the forum from the outside world, while keeping port `27017` of the
-MongoDB container closed. In contrast with spinning up two separate containers
-and then adding them to the same Docker network, using Docker Compose abstracts
-this complexity away by automatically creating a network for all the containers
-defined in `docker-compose.yml`.
+Firstly, we used *Docker Compose* @docker-compose to deploy our NodeBB and
+MongoDB instances. With this setup, both applications are run in an isolated
+network that is not exposed to the internet @docker-networks. It is then
+possible to expose specific ports of specific containers. We have exposed port
+`4567` of the NodeBB container to allow access to the forum from the outside
+world, while keeping port `27017` of the MongoDB container closed. In contrast
+with spinning up two separate containers and then adding them to the same Docker
+network, using Docker Compose abstracts this complexity away by automatically
+creating a network for all the containers defined in `docker-compose.yml`.
 
 Additionally, we generate a random 256-bit password for the `nodebb` database
 user. The `mongo` Docker image supports providing custom scripts that are run
