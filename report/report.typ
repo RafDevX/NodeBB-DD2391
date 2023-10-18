@@ -45,7 +45,7 @@
 
 = Problems
 
-== Database Leakage and Corruption
+== Database Leakage and Corruption <db-leakage>
 
 In today's digital age, it is important to ensure data is secure. It is
 unfortunately common for databases to be exposed to the internet
@@ -145,7 +145,7 @@ measures, depending on the sensitivity of the information in the forum.
 // TODO 2 pages
 
 #pagebreak()
-== Unauthorized Administration
+== Unauthorized Administration <unauthorized-admin>
 
 // TODO 2 pages
 
@@ -154,7 +154,36 @@ measures, depending on the sensitivity of the information in the forum.
 
 == Diogo Correia
 
-// TODO 1 page
+Diogo already had prior experience with Docker and JavaScript, which was a
+valuable skill in this project. Along with #link(<rafael>)[Rafael], he worked on
+the #link(<unauthorized-admin>)[Unauthorized Administration]
+task, deliberating on what was the best course of action for solving the problem at
+hands. It was first decided that we would implement two-factor authentication,
+but upon finding out that the plugin already existed, and that a solution only
+included clicking on a few buttons in the web interface, Diogo decided to
+suggest *passkeys* as an alternative solution.
+
+Therefore, Diogo and Rafael started working on a custom NodeBB plugin for
+passkeys support, which was based on the already existing two-factor plugin.
+Diogo mainly adapted the registration of a security key 2FA token to a passkey
+registration flow, as well as some code cleanup. He also contributed to the
+passkey login flow, but the bulk of the work for that was done by Rafael.
+
+Getting this plugin together involved reading NodeBB's source code, as well as
+reading FIDO specifications, since there is not a lot of documentation available
+for the topic.
+
+Both Diogo and Rafael worked on the report for this problem, with Diogo doing
+the introduction to the topic, comparison with two-factor authentication, and
+the advantages and disadvantages of passkeys.
+
+Additionally, Diogo also worked on the #link(<db-leakage>)[Database Leakage] task,
+by fixing the problem where clean installs stopped being possible after
+persisting the config file. He also contributed to the respective section on the
+report.
+
+Finally, Diogo setup the document for the report, using Typst, along with the
+cover page.
 
 #pagebreak()
 == Neil Prabhu
@@ -190,7 +219,7 @@ container. Lastly, Neil was responsible for completing the _Database Leakage and
 of this report.
 
 #pagebreak()
-== Rafael Oliveira
+== Rafael Oliveira <rafael>
 
 // TODO 1 page
 
