@@ -47,116 +47,97 @@
 
 == Database Leakage and Corruption
 
-In today's digital landscape, data security is paramount. Database leakage and
-corruption refers to the unauthorized access, exposure, and tampering of a
-database's content. Specifically for our scenario, the default configuration of
-the database and NodeBB (a popular forum software) might be insecure, making it
-vulnerable to attacks.
+In today's digital age, it is important to ensure data is secure. It is
+unfortunately common for databases to be exposed to the internet
+#cite("shodan-mysql", "shodan-mongodb"), which leaves them vulnerable to remote
+attacks. If a malicious actor manages to gain access to the database, for
+example, by brute-forcing the password, it can access, expose and tamper with
+its content. The default installation of MongoDB listens on all interfaces,
+which means that if a firewall is not configured, it would be exposed to the
+internet, leaving it vulnerable.
 
-Unauthorized access to the database can lead to data exposure. This means that
-sensitive information stored within the database, such as user credentials,
-personal data, posts, and other sensitive content, could be accessed by
-malicious actors. This data could be used for various malicious purposes, such
-as identity theft, spam, or even blackmail. Furthermore, if attackers gain
-access to the database, they can modify or delete data. This can result in the
-corruption of the forum's content, erasing posts, changing user permissions, or
-even defacing the website. Such actions can damage the reputation of the forum
-and disrupt its normal operation.
+NodeBB uses MongoDB (among other options) to persistently store its data, which
+includes public information, such as posts and replies, but also
+personal or sensitive information, like (hashed) passwords, names, email
+addresses, IP addresses, API keys and so on. If this data were to be accessed or
+modified by an unauthorized and/or malicious user, it could be used nefariously,
+and result in spam, identity theft, social engineering attacks, and even being
+sold to the highest bidder. Depending on the size and reputation of the NodeBB
+forum is question, all of these could be a blow to its activity.
 
-Data leakage can also result in significant privacy violations, potentially
-exposing the personal information of users, which may have legal and ethical
-ramifications. Users' trust in the forum and its operators can be severely
-undermined, and a database breach can damage the reputation of both the
-forum and its administrators. Users may lose trust in the platform, leading to a
-decrease in user engagement, decreased traffic, and potentially a loss of
-revenue.
+As such, we would like to prevent unauthorized and remote access to the database,
+securing the data that it stores.
 
-=== Chosen Countermeasures
+=== Chosen Countermeasures and Implementations
 
-1. _Deployment within isolated Docker Network_: The NodeBB application will be
-  deployed within an isolated Docker network, ensuring that the database container
-  and the host machine are not within direct reach.
+With this threat model in mind, we have devised two strategies to improve the
+security of the database installation. As opposed to a bare metal installation,
+we have opted to deploy containerized applications using **Docker** @docker.
 
-2. _Randomized Database Password_: A randomized, complex password will be used for
-  the database access. This ensures that even if an attacker gains access to the
-  Docker environment, they won't be able to connect to the database without
-  knowing the password.
+Firstly, we used **Docker Compose** @docker-compose to deploy our NodeBB and MongoDB
+instances. With this setup, both applications are run in an isolated network
+that is not exposed to the internet @docker-networks. It is then possible to
+expose specific ports of specific containers. We have exposed port `4567` of the
+NodeBB container to allow access to the forum from the outside world, while keeping port `27017` of the
+MongoDB container closed. In contrast with spinning up two separate containers
+and then adding them to the same Docker network, using Docker Compose abstracts
+this complexity away by automatically creating a network for all the containers
+defined in `docker-compose.yml`.
 
-=== Reasoning for the Countermeasures
-
-The chosen countermeasure addresses the security concerns by leveraging the
-inherent benefits of Docker and implementing strong access control:
-
-1. _Isolation_: By deploying the application within an isolated Docker network, we
-  take advantage of Docker's bridged networks and network namespaces, effectively
-  preventing direct access to containers from the host machine. This means that an
-  attacker on the host machine won't be able to access the database container
-  directly.
-
-2. _Randomized Password_: Using a randomized database password adds an additional
-  layer of security. Even if an attacker manages to compromise the Docker
-  environment or obtain access to configuration files, they will not be able to
-  access the database without knowing the complex, randomized password.
-
-=== Implementation of the Countermeasure
-
-The implementation of this countermeasure involved several steps:
-
-Step 1: Setting Up Docker Compose Stack
-
-1. _Docker Installation_: Ensured that Docker is installed on the host machine.
-
-2. _Docker Compose Configuration_: Created a Docker Compose configuration file that
-  defines the services for NodeBB and the database. Also ensured that the database
-  service is not exposed to the host network, and only accessible within the
-  Docker network.
-
-Step 2: Randomized Database Password
-
-1. _Password Generation_: Generated a strong, randomized database password upon
-  initial deployment.
-
-2. _Database Configuration_: Modified the NodeBB configuration to use the
-  randomized database password for database connections. This involved updating
-  the configuration files and environment variables.
-
-Step 3: Testing and Verification
-
-1. _Testing_: Verified that the NodeBB application functions correctly with the set
-  database configurations.
-
-Step 4: Continuous Monitoring
-
-In practice, our chosen countermeasures should ideally be supplemented by:
-
-1. _Security Scanning_: Conduct security scans and penetration tests to ensure that
-  there are no vulnerabilities or misconfigurations.
-
-2. _Logging and Monitoring_: Set up logging and monitoring to detect any suspicious
-  activity or unauthorized access attempts.
-
-3. _Regular Password Rotation_: Implement a policy for regular password rotation to
-  maintain the security of the database.
+Additionally, we generate a random 256-bit password for the `nodebb` database
+user. The `mongo` Docker image supports providing custom scripts that are run
+when the database is first created (i.e. the first time the container is
+started) by placing them in the `/docker-entrypoint-initdb.d/` folder inside the
+container. The script we created, `init_user.js`, adds a new user, `nodebb` to
+the `nodebb` database, with full permissions over it. Its password is then
+printed to the logs, allowing us to setup the database connection on NodeBB. We
+have opted to use NodeJS' `crypto` library for the password generation instead
+of `Math.random`, due to its secure randomness.
 
 === Difficulties and Solutions
 
-During the implementation of these countermeasures, we encountered a few
-challenges, and here's how we overcame them:
+During the implementation of these countermeasures, we have stumbled upon a few
+challenges.
 
-1. _Configuration Complexity_: Configuring Docker and managing Docker Compose
-  stacks was quite complex, and we had to rely on documentation and online
-  resources. Perhaps we could have used container orchestration tools like
-  Kubernetes for more advanced control if we were actually deploying the software
-  in production.
+The Docker installation method is not listed on NodeBB's documentation
+@nodebb-docs, which meant we had to figure out how to set it up ourselves. There
+is, however, both a `Dockerfile` and a `docker-compose.yml` file in NodeBB's
+repository @nodebb-repo, which we used as a guideline. NodeBB also provides an
+official image, available as `ghcr.io/nodebb/nodebb`. Nevertheless, we had to
+find a way to persist the `config.json` file, which stores the database
+credentials and other configuration, inside the container. We had two requisites
+for a solution to this problem: firstly, it would need to persist this file if
+the container is destroyed (i.e. by running `docker compose down`); secondly, we
+should still be able to run the web installer from a clean install.
 
-2. _Compatibility Issues_: We discovered compatibility issues between the chosen
-  database management system and NodeBB within the Docker environment. We had to
-  troubleshoot these compatibility issues by consulting relevant documentation and
-  forums.
+The first approach we took to fix this problem only satisfied the first
+requisite, since we stopped being able to do a clean install from an empty
+database. We had mounted the `config.json` file using Docker bind mounts
+@docker-bind-mounts, but that meant that the file would have to be created
+beforehand, (which would not work on a clean database) otherwise Docker would
+mount it as a directory instead.
 
-3. _Lack of Documentation_: We noticed that there was a lack of documentation for
-  setting up NodeBB with Docker, and the docker-compose template in the repository
-  was found to be outdated.
+On our second and final approach, we found out, by inspecting the code, that
+NodeBB supports passing the path to the `config.json` file in the `config`
+(lowercase) environment variable. We have then set this variable to
+`/etc/nodebb/config.json` and persisted the `/etc/nodebb` directory using a
+Docker volume @docker-volumes.
+
+Additionally, for the purpose of this project, we have not persisted files
+uploaded to the NodeBB forum (e.g. attachments to posts, profile pictures, and
+more), as they are not needed for the demonstration of the countermeasures.
+
+Finally, as can be evidenced by the difficulties mentioned above, the lack of
+documentation for NodeBB held us back in certain situations, and we had to
+resort to reading the source code instead.
+
+=== Final Thoughts
+
+To conclude, by avoiding the exposure of the database to the internet we should
+prevent attacks from remote users. Nevertheless, this does not mean we do not
+need to supplement this measures with additional precautions, such as monitoring
+logs and network traffic, rotating passwords regularly, and other security
+measures, depending on the sensitivity of the information in the forum.
 
 #pagebreak()
 == Unauthorized Access
@@ -218,3 +199,6 @@ of this report.
 
 // TODO 1 page
 
+#pagebreak()
+#show bibliography: set heading(numbering: "1.")
+#bibliography("references.yml", title: "References")
