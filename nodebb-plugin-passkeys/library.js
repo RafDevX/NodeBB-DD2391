@@ -346,7 +346,7 @@ plugin.checkForcePasskey = async ({ req, res }) => {
 
     const redirect = requestPath.replace(nconf.get('relative_path'), '');
 
-    if (req.url.startsWith('/admin') || (!req.url.startsWith('/admin') && !req.url.match('passkeys'))) {
+    if (req.url.startsWith('/admin') || !req.url.match('passkeys')) {
         if (res.locals.isAPI) {
             controllerHelpers.formatApiResponse(
                 401,
