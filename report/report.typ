@@ -538,12 +538,12 @@ remaining group members until he was satisfied with the end product.
 
 #pagebreak()
 == Yannik Tausch
-While the different attack scenarios and possible mitigations of the _Unauthorized Access_ chapter were discussed in our group, including the choice of selecting a login CAPTCHA as a countermeasure, Yannik contributed the categorization of possible attack scenarios and their taxonomy to the _Unauthorized Access_ chapter of this report.
+While the different attack scenarios and possible mitigations of the #link(<unauthorizedAccess>, [_Unauthorized Access_]) chapter were discussed in our group, including the choice of selecting a login CAPTCHA as a countermeasure, Yannik contributed the categorization of possible attack scenarios and their taxonomy to the #link(<unauthorizedAccess>, [_Unauthorized Access_]) chapter of this report.
 Related to this chapter, he also researched the default countermeasures of NodeBB and evaluated their impact on the security of the application within the attack scenario taxonomy.
 
 Yannik also developed the password brute-force Python script that can be used to demonstrate the strengths and weaknesses of the default NodeBB countermeasures against _Unauthorized Access_ attack scenarios.
 Additionally, he was responsible for implementing the login CAPTCHA countermeasure, including the solving of problems that occurred during the setup.
-Also, Yannik put the entire _Unauthorized Access_ chapter of this report into actual words.
+Also, Yannik put the entire #link(<unauthorizedAccess>, [_Unauthorized Access_]) chapter of this report into actual words.
 
 Additionally, Yannik helped other group members with the Docker setup of the application and contributed his knowledge about the initialization of the MongoDB Docker container.
 
