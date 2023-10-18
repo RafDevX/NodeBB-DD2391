@@ -2,6 +2,8 @@
 
 #set page("a4")
 #set text(12pt)
+#let kthblue = rgb("#2258a5")
+#show link: it => underline(stroke: 1pt + kthblue, text(fill: kthblue, it.body))
 #show heading: set block(above: 1.4em, below: 1em)
 #align(center + horizon)[
   #heading(outlined: false)[Cybersecurity Project DD2391/DD2394]
@@ -677,7 +679,7 @@ of this report.
 
 Having already prior experience with most of the technologies involved in this
 project, Rafael's skillset and reasoning were crucial for its development. He
-mainly worked with #link(<diogo>)[Diogo] on the #link(<unauthorized-admin>)[_Unauthorized Administration_] task,
+mainly worked with #link(<diogo>)[Diogo] on the #link(<unauthorized-admin>)[Unauthorized Administration] task,
 participating in the original discussion that first established our group's
 point of view regarding passkeys being more relevant for this context than
 traditional Two-Factor Authentication.
@@ -699,7 +701,7 @@ required to support that), counting also on Diogo's assistance at the end to
 refactor some parts and fix a few bugs.
 
 Additionally, Rafael implemented the per-group passwordless enforcement feature,
-which is arguably the cornerstone of our solution to the #link(<unauthorized-admin>)[_Unauthorized Administration_] problem
+which is arguably the cornerstone of our solution to the #link(<unauthorized-admin>)[Unauthorized Administration] problem
 for this project. He also wrote the `README.md` file at the root of the project
 repository, explaining how to configure and run a NodeBB instance that showcases
 all the solutions we developed for the three problems we worked on during the
