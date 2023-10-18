@@ -269,16 +269,16 @@ technology.
 #pagebreak()
 = Group Members
 
-== Diogo Correia
+== Diogo Correia <diogo>
 
 Diogo already had prior experience with Docker and JavaScript, which was a
 valuable skill in this project. Along with #link(<rafael>)[Rafael], he worked on
 the #link(<unauthorized-admin>)[Unauthorized Administration]
-task, deliberating on what was the best course of action for solving the problem at
-hands. It was first decided that we would implement two-factor authentication,
-but upon finding out that the plugin already existed, and that a solution only
-included clicking on a few buttons in the web interface, Diogo decided to
-suggest *passkeys* as an alternative solution.
+task, deliberating on what was the best course of action for solving the problem
+at hands. It was first decided that we would implement two-factor
+authentication, but upon finding out that the plugin already existed, and that a
+solution only included clicking on a few buttons in the web interface, Diogo
+decided to suggest *passkeys* as an alternative solution.
 
 Therefore, Diogo and Rafael started working on a custom NodeBB plugin for
 passkeys support, which was based on the already existing two-factor plugin.
@@ -303,7 +303,7 @@ Finally, Diogo setup the document for the report, using Typst, along with the
 cover page.
 
 #pagebreak()
-== Neil Prabhu
+== Neil Prabhu <neil>
 
 Before this project, Neil had a basic understanding of web applications and
 database management, but had never worked with NodeBB. Similarly, Docker and
@@ -338,7 +338,48 @@ of this report.
 #pagebreak()
 == Rafael Oliveira <rafael>
 
-// TODO 1 page
+Having already prior experience with most of the technologies involved in this
+project, Rafael's skillset and reasoning were crucial for its development. He
+mainly worked with #link(<diogo>)[Diogo] on the #link(<unauthorized-admin>)[_Unauthorized Administration_] task,
+participating in the original discussion that first established our group's
+point of view regarding passkeys being more relevant for this context than
+traditional Two-Factor Authentication.
+
+He set up the first skeletal structure of our new NodeBB passkeys plugin, and
+actively reviewed Diogo's contribution of Passkey Registration to that plugin,
+having refactored small parts.
+
+For the most part, however, Rafael developed the login functionality of the
+Passkeys Plugin, widely researching the best practices on how one would
+implement such a feature; and due to NodeBB's poor documentation regarding
+plugins, this mostly meant reading through several repositories' source code,
+including NodeBB itself, multiple existing plugins with one or two similar
+aspects, and some existing `passport` strategies. Browsing through tens of
+resources at a time, including specification reference guides and implementation
+libraries' documentation, he wrote and tested the majority of the complex login
+challenge-response logic (and all the visual page, API endpoints, and routing
+required to support that), counting also on Diogo's assistance at the end to
+refactor some parts and fix a few bugs.
+
+Additionally, Rafael implemented the per-group passwordless enforcement feature,
+which is arguably the cornerstone of our solution to the #link(<unauthorized-admin>)[_Unauthorized Administration_] problem
+for this project. He also wrote the `README.md` file at the root of the project
+repository, explaining how to configure and run a NodeBB instance that showcases
+all the solutions we developed for the three problems we worked on during the
+course of this project.
+
+Diogo and Rafael both worked on @unauthorized-admin of this report, pertaining
+to the _Unauthorized Administration_ problem, with Rafael having written the
+entirety of the second half, which outlines the technical details of our
+solution and details a conclusion of our work on that front.
+
+Rafael also introduced the initial `docker-compose.yml` configuration for
+running NodeBB, which has since been greatly iterated on by #link(<diogo>)[Diogo] and #link(<neil>)[Neil].
+
+Finally, Rafael reviewed every single part of the project, including all lines
+of code and all parts of this report not authored by him. He provided
+constructive feedback and requested as many changes as necessary from the
+remaining group members until he was satisfied with the end product.
 
 #pagebreak()
 == Yannik Tausch
