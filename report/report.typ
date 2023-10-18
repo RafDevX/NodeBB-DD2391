@@ -20,6 +20,12 @@
     Yannik Tausch\
     #link("mailto:yannikt@kth.se")
   ])
+
+  #v(20pt)
+
+  #smallcaps[october 2023]
+
+  Cybersecurity Overview, KTH Royal Institute of Technology
 ]
 
 #pagebreak()
