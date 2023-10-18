@@ -29,14 +29,13 @@ In order to run our solution locally, please follow the steps below. Note that f
     - MongoDB Database: `nodebb`
 
 5. After installation is complete, you will be redirected by the web installer to the forum home page, where you may sign in using the administrator credentials you configured
-6. Due to a bug in NodeBB, two separate instances of the application may now be running post-installation and competing for port 4567, so you should run `docker compose restart nodebb` for the "Rebuild & Restart" commands below to work properly
-7. Activate passkeys support by going to "Admin" > "Extend" > "Plugins" > "nodebb-plugin-passkeys" > "Activate" > "Confirm" > "Rebuild & Restart" > "Confirm"
-8. Refresh the page after NodeBB says the rebuild has been completed
-9. Enforce passwordless requirements for all Administrators in "Plugins" > "Passkeys" > (Select `administrators`) > "Save changes"
-10. As you are an administrator, you will now be required to register a passkey (you could have also previously done so of your own volition in "Settings" > "Passkeys")
-11. Activate login CAPTCHAs by navigating to "Admin" > "Extend" > "Plugins" > "nodebb-plugin-spam-be-gone" > "Activate" > "Confirm" > "Rebuild & Restart" > "Confirm"
-12. Refresh the page after NodeBB says the rebuild has been completed
-13. Go to "Plugins" > "Spam Be Gone" > "Google reCAPTCHA", check both checkboxes ("Enable Re-Captcha" and "Enable Re-Captcha on login page as well"), fill out with your API keys (that must be v2 keys for "I am not a Robot" checkboxes, created in [Google's reCAPTCHA Admin Portal](https://www.google.com/recaptcha/admin)), and press "Save changes"
-14. After you have completed these steps, the system is fully configured and should be securely addressing/mitigating the problems described above. It is now production-ready!
+6. Activate passkeys support by going to "Admin" > "Extend" > "Plugins" > "nodebb-plugin-passkeys" > "Activate" > "Confirm" > "Rebuild & Restart" > "Confirm"
+7. Refresh the page after NodeBB says the rebuild has been completed
+8. Enforce passwordless requirements for all Administrators in "Plugins" > "Passkeys" > (Select `administrators`) > "Save changes"
+9. As you are an administrator, you will now be required to register a passkey (you could have also previously done so of your own volition in "Settings" > "Passkeys")
+10. Activate login CAPTCHAs by navigating to "Admin" > "Extend" > "Plugins" > "nodebb-plugin-spam-be-gone" > "Activate" > "Confirm" > "Rebuild & Restart" > "Confirm"
+11. Refresh the page after NodeBB says the rebuild has been completed
+12. Go to "Plugins" > "Spam Be Gone" > "Google reCAPTCHA", check both checkboxes ("Enable Re-Captcha" and "Enable Re-Captcha on login page as well"), fill out with your API keys (that must be v2 keys for "I am not a Robot" checkboxes, created in [Google's reCAPTCHA Admin Portal](https://www.google.com/recaptcha/admin)), and press "Save changes"
+13. After you have completed these steps, the system is fully configured and should be securely addressing/mitigating the problems described above. It is now production-ready!
 
 At any point, you can stop and remove the containers with `docker compose down` (or `docker compose down -v` to delete volumes as well, permanently destroying all stored data).
