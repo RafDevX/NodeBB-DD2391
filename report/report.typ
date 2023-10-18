@@ -55,7 +55,7 @@ Data leakage can also result in significant privacy violations, potentially expo
 
 === Chosen Countermeasures
 
-1. _Deployment within Docker Compose Stack_: The NodeBB application will be deployed within a Docker Compose stack. This ensures that the database container is isolated from direct access from the host machine.
+1. _Deployment within isolated Docker Network_: The NodeBB application will be deployed within an isolated Docker network, ensuring that the database container and the host machine are not within direct reach.
 
 2. _Randomized Database Password_: A randomized, complex password will be used for the database access. This ensures that even if an attacker gains access to the Docker environment, they won't be able to connect to the database without knowing the password.
 
@@ -63,36 +63,35 @@ Data leakage can also result in significant privacy violations, potentially expo
 
 The chosen countermeasure addresses the security concerns by leveraging the inherent benefits of Docker and implementing strong access control:
 
-1. _Isolation_: By deploying the application within a Docker Compose stack, we take advantage of Docker's network isolation. Docker uses bridged networks and network namespaces, effectively preventing direct access to containers from the host machine. This means that an attacker on the host machine won't be able to access the database container directly.
+1. _Isolation_: By deploying the application within an isolated Docker network, we take advantage of Docker's bridged networks and network namespaces, effectively preventing direct access to containers from the host machine. This means that an attacker on the host machine won't be able to access the database container directly.
 
 2. _Randomized Password_: Using a randomized database password adds an additional layer of security. Even if an attacker manages to compromise the Docker environment or obtain access to configuration files, they will not be able to access the database without knowing the complex, randomized password.
 
 === Implementation of the Countermeasure
 
-The implementation of this countermeasure involves several steps:
+The implementation of this countermeasure involved several steps:
 
-Step 1: Set Up Docker Compose Stack
+Step 1: Setting Up Docker Compose Stack
 
-1. _Docker Installation_: Ensure Docker is installed on the host machine.
+1. _Docker Installation_: Ensured that Docker is installed on the host machine.
 
-2. _Docker Compose Configuration_: Create a Docker Compose configuration file that defines the services for NodeBB and the database. Ensure that the database service is not exposed to the host network, and only accessible within the Docker network.
+2. _Docker Compose Configuration_: Created a Docker Compose configuration file that defines the services for NodeBB and the database. Also ensured that the database service is not exposed to the host network, and only accessible within the Docker network.
 
 Step 2: Randomized Database Password
 
-1. _Database Configuration_: Modify the NodeBB configuration to use the randomized database password for database connections. This may involve updating the configuration files, environment variables, or a secrets management tool, depending on your setup.
+1. _Password Generation_: Generated a strong, randomized database password upon initial deployment.
 
-2. _Password Management_: Generate a strong, randomized password using a secure password manager or generator.
-
-3. _Apply Changes_: Restart the NodeBB application to apply the new configuration with the randomized database password.
+2. _Database Configuration_: Modified the NodeBB configuration to use the randomized database password for database connections. This involved updating the configuration files and environment variables.
 
 Step 3: Testing and Verification
 
-1. _Testing_: Verify that the NodeBB application functions correctly with the new database configuration.
+1. _Testing_: Verified that the NodeBB application functions correctly with the set database configurations.
 
-Step 4: Continuous Monitoring (in practice)
+Step 4: Continuous Monitoring
+
+In practice, our chosen countermeasures should ideally be supplemented by:
 
 1. _Security Scanning_: Conduct security scans and penetration tests to ensure that there are no vulnerabilities or misconfigurations.
-
 
 2. _Logging and Monitoring_: Set up logging and monitoring to detect any suspicious activity or unauthorized access attempts.
 
@@ -105,6 +104,8 @@ During the implementation of these countermeasures, we encountered a few challen
 1. _Configuration Complexity_: Configuring Docker and managing Docker Compose stacks was quite complex, and we had to rely on documentation and online resources. Perhaps we could have used container orchestration tools like Kubernetes for more advanced control if we were actually deploying the software in production.
 
 2. _Compatibility Issues_: We discovered compatibility issues between the chosen database management system and NodeBB within the Docker environment. We had to troubleshoot these compatibility issues by consulting relevant documentation and forums.
+
+3. _Lack of Documentation_: We noticed that there was a lack of documentation for setting up NodeBB with Docker, and the docker-compose template in the repository was found to be outdated.
 
 #pagebreak()
 == Unauthorized Access
@@ -126,11 +127,11 @@ During the implementation of these countermeasures, we encountered a few challen
 #pagebreak()
 == Neil Prabhu
 
-Before this project, I had a basic understanding of web applications and database management, but I had never encountered NodeBB. Similarly, Docker and containerization were tools/technologies that I had extremely limited experience in. Therefore, the learning curve was steep and required me to dive headfirst into technologies that were entirely new to me, but I was eager to embrace them.
+Before this project, Neil had a basic understanding of web applications and database management, but had never worked with NodeBB. Similarly, Docker and containerization were tools/technologies that Neil had extremely limited experience in. Therefore, the learning curve was steep and required him to dive headfirst into technologies that were entirely new to him, but Neil was eager to embrace them.
 
-One of the most valuable aspects of this journey was the opportunity to shadow other group members who had more experience with NodeBB and Docker. Through collaboration and learning from their expertise, I gained practical insights into these technologies. They shared their knowledge about configuring and deploying NodeBB within Docker Compose stacks, managing Docker networks, and maintaining containerized applications. As I encountered challenges during the implementation phase, I was fortunate to have experienced team members to turn to for guidance. I remember struggling with Docker network configurations and compatibility issues with the database management system, and it was through their mentorship that I gained a better understanding of how to overcome these hurdles.
+One of the most valuable aspects of this journey for Neil was the opportunity to shadow other group members who had more experience with NodeBB and Docker. Through collaboration and learning from their expertise, Neil gained practical insights into these technologies. They shared their knowledge about configuring and deploying NodeBB within Docker Compose stacks, managing Docker networks, and maintaining containerized applications. As Neil encountered challenges during the implementation phase, he was fortunate to have experienced team members to turn to for guidance. Neil remembers struggling with Docker network configurations and compatibility issues with the database management system, and it was through their mentorship that he gained a better understanding of how to overcome these hurdles.
 
-Specifically, I was responsible for persisting the admin user so that every time we started the docker image, we didn't have to initialize and register the admin constantly.  I created a Docker volume or bind mount to store the NodeBB data, ensuring that the admin user data was saved there. Then, I configured the NodeBB application to reference this volume or bind mount for data storage, guaranteeing that the admin user's credentials were preserved between Docker container restarts. Consequently, whenever the Docker image was started, NodeBB loaded the persisted data from the volume or bind mount, ensuring that the admin user remained accessible without the need for repeated initialization and registration. Lastly, I was responsible for completing the _Database Leakage and Corruption_ chapter of this report.
+Specifically, Neil was responsible for persisting the NodeBB configuration since there was no official documentation about how to do that when deploying NodeBB with Docker.  Neil created a Docker volume to store the NodeBB data, especially the database configuration. The configuration of the Docker volume is now part of our Docker Compose stack. Consequently, whenever the Docker Compose stack is restarted, NodeBB loads the persisted data from the volume, ensuring that no repeated configuration is necessary. This also works for updates of the NodeBB container. Lastly, Neil was responsible for completing the _Database Leakage and Corruption_ chapter of this report.
 
 #pagebreak()
 == Rafael Oliveira
