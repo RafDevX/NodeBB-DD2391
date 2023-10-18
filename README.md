@@ -1,5 +1,10 @@
 # NodeBB-DD2391
 
+## Report
+> **Our report in PDF format is available here: [Final Release](https://github.com/RafDevX/NodeBB-DD2391/releases/tag/submission)**
+
+## Overview
+
 This repository contains Group 2's solution for the HT 2023 Cybersecurity Project for the DD2391/DD2394 courses at KTH Royal Institute of Technology.
 
 In this project, we attempted to solve or mitigate three problems related to the [NodeBB](https://github.com/NodeBB/NodeBB) software:
