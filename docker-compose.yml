@@ -8,8 +8,6 @@ services:
       - db
     ports:
       - 127.0.0.1:4567:4567
-    environment:
-      config: /etc/nodebb/config.json
     volumes:
       - nodebb-config:/etc/nodebb
 
