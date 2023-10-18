@@ -3,7 +3,7 @@
 define('forum/login', ['api', 'alerts'], (api, alerts) => ({
     init() {
         const btn = this.getButton();
-        btn.addEventListener('click', (event) => {
+        btn?.addEventListener('click', (event) => {
             event.preventDefault();
             if (btn.disabled) return;
             btn.disabled = true;
