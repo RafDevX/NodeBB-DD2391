@@ -25,7 +25,7 @@ In order to run our solution locally, please follow the steps below. Note that f
     - MongoDB Host: `db`
     - MongoDB Port: `21017`
     - MongoDB Username: `nodebb`
-    - MongoDB Password: this (randomly-generated) value is shown at the beginning of the DB logs (`docker compose logs -f`) during first execution; copy-paste it here
+    - MongoDB Password: this (randomly-generated) value is shown at the beginning of the DB logs (`docker compose logs db -f`) during the first execution; copy-paste it here
     - MongoDB Database: `nodebb`
 
 5. After installation is complete, you will be redirected by the web installer to the forum home page, where you may sign in using the administrator credentials you configured
