@@ -1,0 +1,87 @@
+# https://github.com/typst/hayagriva/blob/main/docs/file-format.md
+shodan-mysql:
+  type: web
+  title:
+    value: MySQL
+    verbatim: true
+  url:
+    value: https://www.shodan.io/search?query=mysql
+    date: 2023-10-18
+  parent:
+    type: web
+    title: shodan.io
+    url: https://www.shodan.io
+shodan-mongodb:
+  type: web
+  title:
+    value: MongoDB
+    verbatim: true
+  url:
+    value: https://www.shodan.io/search?query=mongodb
+    date: 2023-10-18
+  parent:
+    type: web
+    title: shodan.io
+    url: https://www.shodan.io
+docker:
+  type: web
+  title: "Docker: Accelerated Container Application Development"
+  url:
+    value: https://www.docker.com/
+    date: 2023-10-18
+docker-compose:
+  type: web
+  title: Docker Compose overview
+  url:
+    value: https://docs.docker.com/compose/
+    date: 2023-10-18
+  parent:
+    type: web
+    title: Docker Docs
+    url: https://docs.docker.com
+docker-networks:
+  type: web
+  title: Networking Overview
+  url:
+    value: https://docs.docker.com/network/
+    date: 2023-10-18
+  parent:
+    type: web
+    title: Docker Docs
+    url: https://docs.docker.com
+docker-bind-mounts:
+  type: web
+  title: Bind Mounts
+  url:
+    value: https://docs.docker.com/storage/bind-mounts/
+    date: 2023-10-18
+  parent:
+    type: web
+    title: Docker Docs
+    url: https://docs.docker.com
+docker-volumes:
+  type: web
+  title: Volumes
+  url:
+    value: https://docs.docker.com/storage/volumes/
+    date: 2023-10-18
+  parent:
+    type: web
+    title: Docker Docs
+    url: https://docs.docker.com
+nodebb-docs:
+  type: web
+  title:
+    value: NodeBB documentation
+    verbatim: true
+  url:
+    value: https://docs.nodebb.org
+    date: 2023-10-18
+nodebb-repo:
+  type: repository
+  title:
+    value: NodeBB - Node.js based forum software built for the modern web
+    verbatim: true
+  url:
+    value: https://github.com/NodeBB/NodeBB
+    date: 2023-10-18
