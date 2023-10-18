@@ -350,7 +350,7 @@ actively reviewed Diogo's contribution of Passkey Registration to that plugin,
 having refactored small parts.
 
 For the most part, however, Rafael developed the login functionality of the
-Passkeys Plugin, widely researching the best practices on how one would
+passkeys plugin, widely researching the best practices on how one would
 implement such a feature; and due to NodeBB's poor documentation regarding
 plugins, this mostly meant reading through several repositories' source code,
 including NodeBB itself, multiple existing plugins with one or two similar
