@@ -58,7 +58,7 @@ def try_login(user: str, password: str) -> ResponseType:
     return ResponseType.WRONG_PASSWORD
 
 def main():
-    count = 1
+    count = 0
     with open("wordlist.txt") as f:
         for line in f:
             response = try_login(TARGET_USER, line.strip())
