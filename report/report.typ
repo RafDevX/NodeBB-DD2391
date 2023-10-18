@@ -195,13 +195,7 @@ There is a plethora of different parameters to tune in relation to WebAuthn @w3c
 
 Moreover, we implemented a *Per-Group Passwordless Enforcement* feature that allows administrators (through "Admin" > "Plugins" > "Passkeys") to configure passwordless requirements for specific groups of users (such as the `administrators` group, or even all `registered-users`). Any groups selected using this feature will require its members to register a passkey if they have not already (users cannot view any pages or perform any action until they do), and members of such a group can no longer use their password to login after they have registered a passkey, therefore being forced to always login using a passkey, which significantly improves security as outlined above. We believe this feature is essential to help further the site's security, and our implementation supporting enforcement based on arbitrary groups gives administrators enormous flexibility. Evidently, to solve this specific #smallcaps[Unauthorized Administration] problem for this project, we recommend enabling passwordless enforcement for the `administrators` group.
 
-// TODO
-//
-// explain how registration/login flows work
-// talk about forcing passkeys for administrators
-// difficulties: talk about the lack of documentation/libraries, as well as similarities between security keys, which makes it difficult to find information online
-// maybe add more sources
-// talk about 2FA plugin (basically just give step-by-step on how to enable it and set admin group)
+In conclusion, we consider that passkeys are a groundbreaking authentication method due to their simplicity, ease of use, and security-centered design, so we decided that their adoption (and, ideally, the enforcement of a policy mandating their adoption) would bring immense benefits to NodeBB's security stage, near-completely eliminating the potential consequences of an administrator account's password being compromised. To this effect, we implemented a new plugin to add passkey support to NodeBB and allow sites to make use of this technology.
 
 #pagebreak()
 = Group Members
