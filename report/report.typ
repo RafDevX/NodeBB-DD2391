@@ -148,7 +148,7 @@ logs and network traffic, rotating passwords regularly, and other security
 measures, depending on the sensitivity of the information in the forum.
 
 #pagebreak()
-== Unauthorized Access <unauthorizedAccess>
+== Unauthorized Access <unauthorized-access>
 
 === Possible Attack Scenarios
 An attacker could target a *specific user* and try to brute-force their password in an online attack. The attacker could use a list of *common passwords* such as from the SecLists project #footnote[https://github.com/danielmiessler/SecLists/tree/master/Passwords/Common-Credentials] or may have obtained a *specific list of passwords* that the target user uses on different websites, which could be likely candidates for the user's credentials for the NodeBB instance, or other likely passwords for that specific user.
@@ -190,12 +190,12 @@ Before discussing possible additional countermeasures, we first examined the cou
 
 These countermeasures include a setting of allowing a maximum of 5 login attempts per hour, per user.
 If this limit is exceeded, the user account is locked for 60 minutes. Successful logins reset the number of login attempts, and so does the 60-minute lockout.
-Unfortunately, we could not find an explanation of this setting in the NodeBB documentation but it appears in the NodeBB admin panel under `Settings`~#sym.arrow~`Users`~#sym.arrow~`Account`~`Protection`, as can be seen in @accountSettings.
+Unfortunately, we could not find an explanation of this setting in the NodeBB documentation but it appears in the NodeBB admin panel under `Settings`~#sym.arrow~`Users`~#sym.arrow~`Account`~`Protection`, as can be seen in @account-settings.
 
 #figure(
   image("account_settings.svg", height: 20%),
   caption: "NodeBB Settings Related to Account Protection"
-) <accountSettings>
+) <account-settings>
 
 The behaviour of this account locking mechanism can be verified in the NodeBB source code #footnote[https://github.com/NodeBB/NodeBB/blob/0acb2fcfe472cb745618e806e41af3e551580fad/src/user/auth.js#L16C5-L40]. A locked account can be recovered by the user themselves by receiving a password reset link via email.
 
@@ -211,7 +211,7 @@ Finally, NodeBB's countermeasures against XXXL account lockout attacks are effec
 However, this comes with two limitations: First, being required to reset your password via email is in some sense a degradation in availability; and second, there is nothing preventing a malicious attacker from spamming a large number of login requests, locking the account again faster than the time it takes the user to log in after unlocking it.
 Nevertheless, the default solution is better than nothing, and the request spamming could easily be mitigated by, for example, a web proxy in front of the application.
 
-The default situation is summarized in @defaultMitigations.
+The default situation is summarized in @default-mitigations.
 
 #let tableColors = (
   none, none, none, none, none, none,
@@ -242,7 +242,7 @@ The default situation is summarized in @defaultMitigations.
     v(5pt)
   ),
   caption: [NodeBB Default _Unauthorized Access_ Mitigations]
-) <defaultMitigations>
+) <default-mitigations>
 
 === Countermeasure: Login CAPTCHA
 To improve the security of the application with regard to the threat models outlined in this chapter, different additional countermeasures were considered.
@@ -258,7 +258,7 @@ Additionally, distributed (XXDX) attacks, as long as we limit our scope to botne
 
 Nevertheless, TSNO attacks are still realistic, and it is still possible to force a targeted user into resetting their password with a non-distributed attack - meaning that TXNL attacks are not fully defended against.
 
-A full final overview is given in @finalMitigations.
+A full final overview is given in @final-mitigations.
 
 #let tableColors = (
   none, none, none, none, none, none,
@@ -289,7 +289,7 @@ A full final overview is given in @finalMitigations.
     v(5pt)
   ),
   caption: [NodeBB _Unauthorized Access_ Mitigations with CAPTCHA enabled]
-) <finalMitigations>
+) <final-mitigations>
 
 === Additional Considerations
 As outlined above, a secure password policy should be in place for the mitigations to be effective.
@@ -538,12 +538,12 @@ remaining group members until he was satisfied with the end product.
 
 #pagebreak()
 == Yannik Tausch
-While the different attack scenarios and possible mitigations of the #link(<unauthorizedAccess>, [_Unauthorized Access_]) chapter were discussed in our group, including the choice of selecting a login CAPTCHA as a countermeasure, Yannik contributed the categorization of possible attack scenarios and their taxonomy to the #link(<unauthorizedAccess>, [_Unauthorized Access_]) chapter of this report.
+While the different attack scenarios and possible mitigations of the #link(<unauthorized-access>, [_Unauthorized Access_]) chapter were discussed in our group, including the choice of selecting a login CAPTCHA as a countermeasure, Yannik contributed the categorization of possible attack scenarios and their taxonomy to the #link(<unauthorized-access>, [_Unauthorized Access_]) chapter of this report.
 Related to this chapter, he also researched the default countermeasures of NodeBB and evaluated their impact on the security of the application within the attack scenario taxonomy.
 
 Yannik also developed the password brute-force Python script that can be used to demonstrate the strengths and weaknesses of the default NodeBB countermeasures against _Unauthorized Access_ attack scenarios.
 Additionally, he was responsible for implementing the login CAPTCHA countermeasure, including the solving of problems that occurred during the setup.
-Also, Yannik put the entire #link(<unauthorizedAccess>, [_Unauthorized Access_]) chapter of this report into actual words.
+Also, Yannik put the entire #link(<unauthorized-access>, [_Unauthorized Access_]) chapter of this report into actual words.
 
 Additionally, Yannik helped other group members with the Docker setup of the application and contributed his knowledge about the initialization of the MongoDB Docker container.
 
