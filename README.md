@@ -15,7 +15,7 @@ In order to run our solution locally, please follow the steps below. Note that f
 1. Clone the repository: `git clone git@github.com:RafDevX/NodeBB-DD2391.git`
 2. Start the containers: `docker-compose up -d --build`
 3. Show and watch logs: `docker-compose logs -f`
-4. The first time NodeBB runs, it will spin up a Web Installer that can be accessed at `http://localhost:4567`. You should fill out the fields shown as specified below and then submit by pressing "Install NodeBB" at the bottom of the page:
+4. The first time NodeBB runs, it will spin up a web installer that can be accessed at `http://localhost:4567`. You should fill out the fields shown as specified below and then submit by pressing "Install NodeBB" at the bottom of the page:
 
     - Web Address: `http://localhost:4567` (or the domain where this will be hosted)
     - Administrator Username: any username of your choosing
@@ -28,7 +28,7 @@ In order to run our solution locally, please follow the steps below. Note that f
     - MongoDB Password: this (randomly-generated) value is shown at the beginning of the DB logs (`docker-compose logs -f`) during first execution; copy-paste it here
     - MongoDB Database: `nodebb`
 
-5. After installation is complete, you will be redirected by the Web Installer to the forum home page, where you may sign in using the administrator credentials you configured
+5. After installation is complete, you will be redirected by the web installer to the forum home page, where you may sign in using the administrator credentials you configured
 6. Activate passkeys support by going to "Admin" > "Extend" > "Plugins" > "nodebb-plugin-passkeys" > "Activate" > "Confirm" > "Rebuild & Restart" > "Confirm"
 7. Refresh the page after NodeBB says the rebuild has been completed
 8. Enforce passwordless requirements for all Administrators in "Plugins" > "Passkeys" > (Select `administrators`) > "Save changes"
